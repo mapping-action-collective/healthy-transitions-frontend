@@ -22,7 +22,6 @@ export const redLMarker = icon({
   iconAnchor,
   shadowUrl,
   shadowAnchor,
-  popupAnchor,
   popupAnchor
 });
 
@@ -31,6 +30,5 @@ export const blueLMarker = icon({
   iconAnchor,
   shadowUrl,
   shadowAnchor,
-  popupAnchor,
   popupAnchor
 });
