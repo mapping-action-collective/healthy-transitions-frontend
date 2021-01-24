@@ -1,5 +1,9 @@
-import { Map, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
+import Leaflet from 'leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
+import 'leaflet/dist/leaflet.css';
+import 'react-leaflet-markercluster/dist/styles.min.css';
+
 import './Map.css'
 import greenLMarker from '../resources/green-marker.png'
 import blueLMarker from '../resources/blue-marker.png'
@@ -30,7 +34,10 @@ function Markers (props) {
           position={item.coords}
           id={item.popup.id}
           icon={
-            selectedListing === item.popup.id ? greenLMarker : blueLMarker
+            Leaflet.icon({
+              iconUrl: selectedListing === item.popup.id ? greenLMarker : blueLMarker
+          })
+            
           }
         >
           <Popup>
@@ -61,27 +68,26 @@ function Markers (props) {
 
 function MapPage({mapData}) {
   return (<>
-    <p>{JSON.stringify(mapData)}</p>
-    <Map
-      center={[45.52345, -122.6762]}
+    <MapContainer
+      center={[44.0489388,-123.0919415]}
       zoom={10}
       minZoom={8}
       maxZoom={18}
-      scrollWheelZoom={true}
+      scrollWheelZoom={false /*true*/}
       tap={true}
       dragging={true}
       touchZoom={true}
     >
       <TileLayer
         attribution=""
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" //"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
       />
       <Markers
         mapData={mapData}
         updateListing={updateListing}
         selectedListing={selectedListing}
       />
-    </Map>
+    </MapContainer>
   </>)
 }
 
