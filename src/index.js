@@ -1,17 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {HashRouter as Router, Route, Routes} from 'react-router-dom'
+
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import Page from './components/Page'
+import Map from './components/Map'
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import getData from './data'
+import { formatMapData } from './utils';
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+function App({mapData}) {
+  return (
+    <Router>
+      <Page>
+        <Routes>
+          <Route path="" element={<></>} />
+          <Route path="map" element={<Map mapData={mapData} />} />
+        </Routes>
+      </Page>
+    </Router>
+  );
+}
+
+getData().then(({data}) => ReactDOM.render(<App mapData={formatMapData(data)} />, window.app))
