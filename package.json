@@ -10,6 +10,9 @@
     "papaparse": "^5.3.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-leaflet": "^2.6.3",
+    "react-leaflet-markercluster": "^2.0.0",
+    "react-router-dom": "^6.0.0-beta.0",
     "react-scripts": "4.0.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3"
