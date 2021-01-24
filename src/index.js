@@ -15,7 +15,10 @@ function App({mapData}) {
       <Page>
         <Routes>
           <Route path="" element={<><p>{JSON.stringify(mapData)}</p></>} />
-          <Route path="map" element={<Map mapData={mapData} />} />
+          <Route path="map">
+            <Route path="/" element={<Map mapData={mapData} />} />
+            <Route path=":markerId" element={<Map mapData={mapData} />} />
+          </Route>
         </Routes>
       </Page>
     </Router>
