@@ -14,7 +14,7 @@ function App({mapData}) {
     <Router>
       <Page>
         <Routes>
-          <Route path="" element={<></>} />
+          <Route path="" element={<><p>{JSON.stringify(mapData)}</p></>} />
           <Route path="map" element={<Map mapData={mapData} />} />
         </Routes>
       </Page>
