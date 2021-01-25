@@ -1,7 +1,7 @@
 import { createRef, forwardRef, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Container, Segment, Input, Card, Grid, Ref, Sticky } from "semantic-ui-react";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
@@ -17,7 +17,7 @@ function Markers ({mapData, cardRefs}) {
 
   return (<>
     <MarkerClusterGroup>
-      {mapData.map(({coords, popup}, index) =>
+      {mapData.map(({coords, popup}) =>
         <Marker key={popup.id} position={coords} icon={markerId === `${popup.id}` ? greenLMarker : blueLMarker}>
           <Popup>
             <div className="popup-container">
@@ -49,14 +49,18 @@ const MapCard = forwardRef(({popup, index}, ref) =>
 )
 
 function MapPage({mapData}) {
-  const params = useParams()
+  const {markerId} = useParams()
   const navigate = useNavigate()
   const [search, updateSearch] = useState()
   const filteredMapData = filterMapData(mapData, search)
   const mapRef = createRef()
   const cardRefs = filteredMapData.reduce((cardRefs, item) => ({...cardRefs, [item.popup.id]: createRef()}), {})
-  const currentCard = cardRefs[params.markerId]
-  useEffect(() => currentCard && currentCard.current.scrollIntoView({behavior: "smooth"}), [currentCard])
+  const currentCard = cardRefs[markerId]
+  useEffect(() => {if(currentCard) currentCard.current.scrollIntoView({behavior: "smooth"})}, [currentCard])
+  const currentCoords = filteredMapData[markerId]?.coords
+  const mapPositionParams = currentCoords
+    ? {bounds: [currentCoords]}
+    : {center: [44.0489388,-123.0919415]}
 
   return (<>
     <Segment color="pink" basic inverted>
@@ -69,7 +73,8 @@ function MapPage({mapData}) {
         <Grid.Column>
           <Sticky context={mapRef} offset={14}>
             <Segment as={MapContainer}
-              center={[44.0489388,-123.0919415]}
+              key={currentCoords}
+              {...mapPositionParams}
               zoom={10}
               minZoom={8}
               maxZoom={18}
@@ -79,7 +84,6 @@ function MapPage({mapData}) {
               touchZoom={true}
             >
               <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-              {/* alternate map tile source: https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png */}
               <Markers mapData={filteredMapData} cardRefs={cardRefs} />
             </Segment>
           </Sticky>
