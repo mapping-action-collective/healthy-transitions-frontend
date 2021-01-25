@@ -23,7 +23,7 @@ function Markers ({mapData, cardRefs}) {
             <div className="popup-container">
               <div>{popup.listing}</div>
               <div>{`${popup.street} ${popup.street2}`}</div>
-              <Link to={`/map/${popup.id}`} onClick={() => { cardRefs[index].current.scrollIntoView({behavior: "smooth"}) }} className="popup-show-details">Show Details</Link>
+              <Link to={`/map/${popup.id}`} onClick={() => { cardRefs[popup.id].current.scrollIntoView({behavior: "smooth"}) }} className="popup-show-details">Show Details</Link>
             </div>
           </Popup>
             <Tooltip>
@@ -39,7 +39,12 @@ function Markers ({mapData, cardRefs}) {
 
 const MapCard = forwardRef(({popup, index}, ref) =>
   <Ref innerRef={ref}>
-    <Card header={popup.listing} meta={[popup.street, popup.street2].filter(Boolean).join()} color={getColor(index)} centered raised />
+    <Card color={getColor(index)} centered raised>
+      <Card.Content>
+        <Card.Header><Link to={`/map/${popup.id}`}>{popup.listing}</Link></Card.Header>
+        <Card.Meta>{[popup.street, popup.street2].filter(Boolean).join()}</Card.Meta>
+      </Card.Content>
+    </Card>
   </Ref>
 )
 
@@ -49,7 +54,7 @@ function MapPage({mapData}) {
   const [search, updateSearch] = useState()
   const filteredMapData = filterMapData(mapData, search)
   const mapRef = createRef()
-  const cardRefs = filteredMapData.map(() => createRef())
+  const cardRefs = filteredMapData.reduce((cardRefs, item) => ({...cardRefs, [item.popup.id]: createRef()}), {})
   const currentCard = cardRefs[params.markerId]
   useEffect(() => currentCard && currentCard.current.scrollIntoView({behavior: "smooth"}), [currentCard])
 
@@ -80,7 +85,7 @@ function MapPage({mapData}) {
           </Sticky>
         </Grid.Column>
         <Grid.Column as={Card.Group} itemsPerRow="1">
-          {filteredMapData.map(({popup}, index) => <MapCard key={`${popup.id}-${index}`} popup={popup} index={index} ref={cardRefs[index]} />)}
+          {filteredMapData.map(({popup}, index) => <MapCard key={`${popup.id}-${index}`} popup={popup} index={index} ref={cardRefs[popup.id]} />)}
         </Grid.Column>
       </Container>
     </Ref>
