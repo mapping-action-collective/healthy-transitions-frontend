@@ -37,12 +37,13 @@ function Markers ({mapData, cardRefs}) {
   </>)
 }
 
-const MapCard = forwardRef(({popup, index}, ref) =>
+const MapCard = forwardRef(({popup: {id, listing, street, street2, ...etc}, index}, ref) =>
   <Ref innerRef={ref}>
     <Card color={getColor(index)} centered raised>
       <Card.Content>
-        <Card.Header><Link to={`/map/${popup.id}`}>{popup.listing}</Link></Card.Header>
-        <Card.Meta>{[popup.street, popup.street2].filter(Boolean).join()}</Card.Meta>
+        <Card.Header><Link to={`/map/${id}`}>{listing}</Link></Card.Header>
+        <Card.Meta>{[street, street2].filter(Boolean).join(" ")}</Card.Meta>
+        <Card.Description as="dl">{Object.entries(etc).filter(([dt, dd]) => dd).map(([dt, dd]) => <><dt>{dt}</dt><dd>{dd}</dd></>)}</Card.Description>
       </Card.Content>
     </Card>
   </Ref>
