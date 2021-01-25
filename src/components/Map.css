@@ -1,1 +1,5 @@
-.leaflet-container { flex: 1 1 auto; }
+.leaflet-container { height: 68vh; }
+
+@media only screen and (max-width:991px){
+  .fixed.sticky { position: absolute !important; }
+}
