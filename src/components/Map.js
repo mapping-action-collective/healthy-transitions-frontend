@@ -55,7 +55,8 @@ function MapPage({mapData}) {
   const [search, updateSearch] = useState()
   const filteredMapData = filterMapData(mapData, search)
   const mapRef = createRef()
-  const cardRefs = filteredMapData.reduce((cardRefs, item) => ({...cardRefs, [item.popup.id]: createRef()}), {})
+  // todo: memoize this
+  const cardRefs = mapData.reduce((cardRefs, item) => ({...cardRefs, [item.popup.id]: createRef()}), {})
   const currentCard = cardRefs[markerId]
   useEffect(() => {if(currentCard) currentCard.current.scrollIntoView({behavior: "smooth"})}, [currentCard])
   const currentCoords = filteredMapData[markerId]?.coords
