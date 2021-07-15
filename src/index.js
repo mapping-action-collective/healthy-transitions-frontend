@@ -14,8 +14,7 @@ function App({mapData}) {
     <Router>
       <Page>
         <Routes>
-          <Route path="" element={<><p>{JSON.stringify(mapData)}</p></>} />
-          <Route path="map">
+          <Route>
             <Route path="/" element={<Map mapData={mapData} />} />
             <Route path=":markerId" element={<Map mapData={mapData} />} />
           </Route>
@@ -25,4 +24,5 @@ function App({mapData}) {
   );
 }
 
-getData().then(({data}) => ReactDOM.render(<App mapData={formatMapData(data)} />, window.app))
+const API_URL = new URL(window.location).searchParams.get('api') || process.env.API_URL
+getData(API_URL).then(data => ReactDOM.render(<App mapData={formatMapData(data)} />, window.app))
