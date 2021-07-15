@@ -2,8 +2,8 @@
 // it returns the same data, formatted for leaflet use
 export function formatMapData(mapData) {
   return mapData
-    .filter(({y, x}) => x && y)
-    .map(({ y, x, ...popup }) => ({coords: [y, x], popup}))
+    .filter(({latitude, longitude}) => longitude && latitude)
+    .map(({ latitude, longitude, ...popup }) => ({coords: [latitude, longitude], popup}))
 }
 
 // this function accepts leaflet-formatted mapData, and filters according to a search string
