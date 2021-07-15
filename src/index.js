@@ -24,5 +24,5 @@ function App({mapData}) {
   );
 }
 
-const API_URL = new URL(window.location).searchParams.get('api') || process.env.API_URL
+const API_URL = new URL(window.location).searchParams.get('api') || `https://hto2020-backend-production.herokuapp.com/api`
 getData(API_URL).then(data => ReactDOM.render(<App mapData={formatMapData(data)} />, window.app))
