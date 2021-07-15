@@ -23,7 +23,7 @@ function Markers ({mapData, cardRefs}) {
             <div className="popup-container">
               <div>{popup.listing}</div>
               <div>{`${popup.street} ${popup.street2}`}</div>
-              <Link to={`/map/${popup.id}`} onClick={() => { cardRefs[popup.id].current.scrollIntoView({behavior: "smooth"}) }} className="popup-show-details">Show Details</Link>
+              <Link to={`/${popup.id}`} onClick={() => { cardRefs[popup.id].current.scrollIntoView({behavior: "smooth"}) }} className="popup-show-details">Show Details</Link>
             </div>
           </Popup>
             <Tooltip>
@@ -41,7 +41,7 @@ const MapCard = forwardRef(({popup: {id, listing, street, street2, ...etc}, inde
   <Ref innerRef={ref}>
     <Card color={getColor(index)} centered raised>
       <Card.Content>
-        <Card.Header><Link to={`/map/${id}`}>{listing}</Link></Card.Header>
+        <Card.Header><Link to={`/${id}`}>{listing}</Link></Card.Header>
         <Card.Meta>{[street, street2].filter(Boolean).join(" ")}</Card.Meta>
         <Card.Description as="dl">{Object.entries(etc).filter(([dt, dd]) => dd).map(([dt, dd]) => <><dt>{dt}</dt><dd>{dd}</dd></>)}</Card.Description>
       </Card.Content>
@@ -67,7 +67,7 @@ function MapPage({mapData}) {
   return (<>
     <Segment color="pink" basic inverted>
       <Container>
-        <Input size="huge" fluid tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate("/map")} onChange={(e, {value}) => updateSearch(value)} />
+        <Input size="huge" fluid tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate("/")} onChange={(e, {value}) => updateSearch(value)} />
       </Container>
     </Segment>
     <Ref innerRef={mapRef}>
