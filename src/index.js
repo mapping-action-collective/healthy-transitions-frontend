@@ -26,9 +26,10 @@ function App({listings}) {
 
 const CURRENT_URL = new URL(window.location)
 const API_URL =
-  CURRENT_URL.searchParams.get('api') ??
+  CURRENT_URL.searchParams.get('api') ?? (
   CURRENT_URL.hostname === `localhost` ? `http://localhost:5050/api`
 : `https://hto2020-backend-production.herokuapp.com/api`
+)
 
 Promise
   .all([ getListings(API_URL) ])
