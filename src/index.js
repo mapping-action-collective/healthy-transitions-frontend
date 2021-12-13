@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {HashRouter as Router, Route, Routes} from 'react-router-dom'
+import { get, set } from 'lodash/fp'
 
 import './index.css';
 import Page from './components/Page'
@@ -10,9 +11,13 @@ import { getListings } from './data'
 import { formatListings } from './utils';
 
 function App({listings}) {
+  const categories = listings.reduce((categories, { category: fullCategory }) => {
+    const [category, subcategory] = fullCategory.split(`: `)
+    return set(`[${category}][${subcategory}]`)(1 + (get(`[${category}][${subcategory}]`)(categories) ?? 0))(categories)
+  }, {})
   return (
     <Router>
-      <Page>
+      <Page categories={categories}>
         <Routes>
           <Route>
             <Route path="/" element={<Map listings={listings} />} />

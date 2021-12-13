@@ -1,35 +1,37 @@
 import { createRef, forwardRef, useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { Container, Segment, Input, Card, Label, Grid, Ref, Sticky, List, Header } from "semantic-ui-react";
+import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-router-dom";
+import { Container, Segment, Input, Card, Label, Grid, Ref, Sticky, List, Form, Icon } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
-import {filterListings} from '../utils'
+import { filterListings } from '../utils'
 import './Map.css'
-import {greenLMarker, blueLMarker} from '../resources/mapIcons'
+import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
-const getColor = (index) => ["red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown"][index%11]
+const getColor = index => [ "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown" ][ index % 11 ]
 
 function MapPage({ listings }) {
   const navigate = useNavigate()
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const [ search, updateSearch ] = useState()
-  const filteredListings = filterListings(listings, search)
   const mapRef = createRef()
-  // todo: memoize this
+  // todo: memoize these lines:
+  const filteredListings = filterListings(listings, searchParams, search)
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
 
   return (<>
-    <Segment color="pink" basic inverted>
-      <Container>
-        <Input size="huge" fluid tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate("/")} onChange={(e, {value}) => updateSearch(value)} />
+    <Segment as={Form} color="pink" basic inverted>
+      <Container as={Form.Group}>
+        <Form.Input size="large" width={4} type="number" placeholder="Age" onChange={(e, {value}) => setSearchParams({ age: value })} />
+        <Form.Input size="large" width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate("/")} onChange={(e, {value}) => updateSearch(value)} />
       </Container>
     </Segment>
     <Ref innerRef={mapRef}>
       <Container fluid as={Grid} stackable doubling reversed='computer' columns={2}>
-        <MapMap filteredListings={filteredListings} mapRef={mapRef} cardRefs={cardRefs} />
-        <MapCards listings={listings} cardRefs={cardRefs} />
+        <MapMap listings={filteredListings} mapRef={mapRef} cardRefs={cardRefs} />
+        <MapCards listings={filteredListings} cardRefs={cardRefs} />
       </Container>
     </Ref>
   </>)
@@ -46,23 +48,24 @@ function MapCards({ listings, cardRefs }) {
   )
 }
 
-const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, ...listing}, index}, ref) =>
+const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
   <Ref innerRef={ref}>
     <Card color={getColor(index)} centered raised className="map-card">
       <Card.Content>
-        { !!parent_organization && <Label as='a' ribbon color={getColor(index)} style={{'margin-bottom': `1em`}}>{parent_organization}</Label> }
+        { !!parent_organization && <Label as={Link} to={`/?parent_organization=${encodeURIComponent(parent_organization)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization}</Label> }
         <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
         <Card.Meta>{full_address}</Card.Meta>
         <Segment secondary>
-          { phone_1 && <Card.Description>{phone_label_1}: {phone_1}</Card.Description> }
-          { phone_2 && <Card.Description>{phone_label_2}: {phone_2}</Card.Description> }
-          { crisis_line_number && <Card.Description>{crisis_line_label}: {crisis_line_number}</Card.Description> }
-          { website && <Card.Description><a href={website}>{website}</a></Card.Description> }
-          { blog_link && <Card.Description><a href={blog_link}>{blog_link}</a></Card.Description> }
-          { twitter_link && <Card.Description><a href={twitter_link}>{twitter_link}</a></Card.Description> }
-          { facebook_link && <Card.Description><a href={facebook_link}>{facebook_link}</a></Card.Description> }
-          { youtube_link && <Card.Description><a href={youtube_link}>{youtube_link}</a></Card.Description> }
-          { instagram_link && <Card.Description><a href={instagram_link}>{instagram_link}</a></Card.Description> }
+          { full_address && <Card.Description><Icon name="map marker alternate" /><a href={`https://www.google.com/maps/place/${encodeURIComponent(full_address)}`}>Get Directions</a></Card.Description> }
+          { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
+          { phone_2 && <Card.Description><Icon name="phone" />{phone_label_2}: <a href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
+          { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
+          { website && <Card.Description><Icon name="globe" /><a href={website}>Website</a></Card.Description> }
+          { blog_link && <Card.Description><Icon name="globe" /><a href={blog_link}>{blog_link}</a></Card.Description> }
+          { twitter_link && <Card.Description><Icon name="twitter" /><a href={twitter_link}>{twitter_link}</a></Card.Description> }
+          { facebook_link && <Card.Description><Icon name="facebook" /><a href={facebook_link}>{facebook_link}</a></Card.Description> }
+          { youtube_link && <Card.Description><Icon name="youtube" /><a href={youtube_link}>{youtube_link}</a></Card.Description> }
+          { instagram_link && <Card.Description><Icon name="instagram" /><a href={instagram_link}>{instagram_link}</a></Card.Description> }
         </Segment>
         <Segment basic vertical>
           <ExpandableDescription label="Description" value={description} />
@@ -71,29 +74,32 @@ const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organiza
           { video_description && <Card.Description>Video description: <a href={video_description}>{video_description}</a></Card.Description> }
         </Segment>
         <Segment secondary>
+          { (min_age || max_age) && <Card.Description><Card.Header as="strong">Age:</Card.Header> {[ min_age, max_age ].join(`-`)}</Card.Description> }
+          { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
           <ValueList name="Languages Offered" values={languages_offered} />
           <ValueList name="Services Provided" values={services_provided} />
           <ValueList name="Keywords" values={keywords} />
         </Segment>
-        <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd]) => <><dt>{dt}</dt><dd>{dd}</dd></>)}</Card.Description>
+        {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
       </Card.Content>
+      <Card.Content extra><NavLink to={`/?category=${encodeURIComponent(category)}`}># {category}</NavLink></Card.Content>
     </Card>
   </Ref>
 )
 
 const ExpandableDescription = ({ label, value }) => <>
     { label && <Card.Header as="strong">{label}:</Card.Header> }
-    { value && <Card.Description className="expandable" tabIndex="0">{value.split(`\n`).map(paragraph => <p>{paragraph}</p>)}</Card.Description> }
+    { value && <Card.Description className="expandable" tabIndex="0">{value.split(`\n`).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</Card.Description> }
 </>
 
 const ValueList = ({ name, values }) => values && (
   <List horizontal as="dl" className="value-list">
-    <List.Item as="dt">{ name }</List.Item>
-    { values.map(dd => <List.Item as="dd">{dd}</List.Item>) }
+    <List.Item key={name} as="dt">{ name }</List.Item>
+    { values.map(dd => <List.Item key={dd} as="dd">{dd}</List.Item>) }
   </List>
 )
 
-function MapMap({ filteredListings, mapRef, cardRefs }) {
+function MapMap({ listings, mapRef, cardRefs }) {
   return (
     <Grid.Column>
       <Sticky context={mapRef} offset={14}>
@@ -108,18 +114,18 @@ function MapMap({ filteredListings, mapRef, cardRefs }) {
           touchZoom={true}
         >
           <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-          <MapMarkers filteredListings={filteredListings} cardRefs={cardRefs} />
+          <MapMarkers listings={listings} cardRefs={cardRefs} />
         </Segment>
       </Sticky>
     </Grid.Column>
   )
 }
 
-function MapMarkers ({filteredListings, cardRefs}) {
+function MapMarkers ({listings, cardRefs}) {
   const { markerId } = useParams()
   const map = useMap()
-  const mappedListings = filteredListings.filter(({ coords: [ lat, lon ] }) => lat && lon)
-  const currentCoords = filteredListings.find(({ guid }) => guid === Number(markerId))?.coords
+  const mappedListings = listings.filter(({ coords: [ lat, lon ] }) => lat && lon)
+  const currentCoords = listings.find(({ guid }) => guid === Number(markerId))?.coords
   useEffect(() => currentCoords && currentCoords[0] && currentCoords[1] && map.setView(currentCoords, 15), [map, currentCoords])
 
   return (<>
