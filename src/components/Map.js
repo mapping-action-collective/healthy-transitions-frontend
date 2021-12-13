@@ -1,6 +1,6 @@
 import { createRef, forwardRef, useEffect, useState } from "react";
 import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Input, Card, Label, Grid, Ref, Sticky, List, Form, Icon } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, Sticky, List, Form, Icon } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
@@ -131,19 +131,22 @@ function MapMarkers ({listings, cardRefs}) {
   return (<>
     <MarkerClusterGroup>
       {mappedListings.map(listing =>
-        <Marker key={listing.guid} position={listing.coords} icon={markerId === `${listing.guid}` ? greenLMarker : blueLMarker} eventHandlers={{ click: ({latlng}) => map.setView(latlng, 15) }}>
-          <listing>
-            <div className="popup-container">
-              <div>{listing.listing}</div>
-              <div>{`${listing.street} ${listing.street2}`}</div>
-              <Link to={`/${listing.guid}`} onClick={() => { cardRefs[listing.guid].current.scrollIntoView({behavior: "smooth"}) }} className="listing-show-details">Show Details</Link>
-            </div>
-          </listing>
-            <Tooltip>
-              <div className="popup-tooltip">
-                <div>{listing.description}</div>
-              </div>
-            </Tooltip>
+        <Marker key={listing.guid} position={listing.coords} icon={markerId === `${listing.guid}` ? greenLMarker : blueLMarker} eventHandlers={{ click: ({latlng}) => map.setView(latlng) }}>
+          <Tooltip>{listing.full_name}</Tooltip>
+          <Popup>
+            <Card style={{ border: `none`, boxShadow: `none` }}>
+              <Card.Content>
+                <Card.Header><Link to={`/${listing.guid}`}>{listing.full_name}</Link></Card.Header>
+                <Card.Meta>{listing.full_address}</Card.Meta>
+                <Segment basic vertical>
+                  <Card.Content>
+                    <div className="description">{listing.description}</div>
+                  </Card.Content>
+                </Segment>
+                <Link to={`/${listing.guid}`} onClick={() => { cardRefs[listing.guid].current.scrollIntoView({behavior: "smooth"}) }} className="listing-show-details">Show Details</Link>
+                </Card.Content>
+            </Card>
+          </Popup>
         </Marker>
       )}
     </MarkerClusterGroup>
