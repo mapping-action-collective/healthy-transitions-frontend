@@ -1,10 +1,11 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useSearchParams } from 'react-router-dom';
 import { Dropdown, Menu, Segment } from 'semantic-ui-react'
 
 import 'semantic-ui-css/semantic.min.css'
 import './Page.css';
 
 function Page({categories, children}) {
+  const [ searchParams, ] = useSearchParams()
   return (
     <>
       <Segment as="header" color="black" basic inverted attached style={{ padding: 0, zIndex: 801 }}>
@@ -13,7 +14,7 @@ function Page({categories, children}) {
           { Object.entries(categories).map(([category, subcategories]) =>
             <Menu.Item key={category} as={Dropdown} text={category}>
               <Dropdown.Menu>
-              { Object.entries(subcategories).map(([subcategory, count]) => <Dropdown.Item key={subcategory} as={NavLink} text={`${subcategory} (${count})`} to={`/?category=${encodeURIComponent(category)}: ${encodeURIComponent(subcategory)}`} />) }
+              { Object.entries(subcategories).map(([subcategory, count]) => <Dropdown.Item key={subcategory} as={NavLink} text={`${subcategory} (${count})`} to={`/?${new URLSearchParams({...Object.fromEntries(searchParams.entries()), category: `${category}: ${subcategory}` }).toString()}`} />) }
               </Dropdown.Menu>
             </Menu.Item>
           ) }

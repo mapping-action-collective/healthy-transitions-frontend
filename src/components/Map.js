@@ -24,8 +24,8 @@ function MapPage({ listings }) {
   return (<>
     <Segment as={Form} color="pink" basic inverted>
       <Container as={Form.Group}>
-        <Form.Input size="large" width={4} type="number" placeholder="Age" onChange={(e, {value}) => setSearchParams({ age: value })} />
-        <Form.Input size="large" width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate("/")} onChange={(e, {value}) => updateSearch(value)} />
+        <Form.Input size="large" width={4} type="number" placeholder="Age" onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams.entries()), age: value })} />
+        <Form.Input size="large" width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => updateSearch(value)} />
       </Container>
     </Segment>
     <Ref innerRef={mapRef}>
@@ -40,7 +40,7 @@ function MapPage({ listings }) {
 function MapCards({ listings, cardRefs }) {
   const { markerId } = useParams()
   const currentCard = cardRefs[markerId]
-  useEffect(() => currentCard && currentCard.current.scrollIntoView({behavior: "smooth"}), [currentCard])
+  useEffect(() => currentCard && currentCard.current?.scrollIntoView({behavior: "smooth"}), [currentCard])
   return (
     <Grid.Column as={Card.Group} itemsPerRow="1">
       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} />)}
@@ -54,18 +54,18 @@ const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organiza
       <Card.Content>
         { !!parent_organization && <Label as={Link} to={`/?parent_organization=${encodeURIComponent(parent_organization)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization}</Label> }
         <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
-        <Card.Meta>{full_address}</Card.Meta>
+        <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
         <Segment secondary>
-          { full_address && <Card.Description><Icon name="map marker alternate" /><a href={`https://www.google.com/maps/place/${encodeURIComponent(full_address)}`}>Get Directions</a></Card.Description> }
-          { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
-          { phone_2 && <Card.Description><Icon name="phone" />{phone_label_2}: <a href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
-          { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
-          { website && <Card.Description><Icon name="globe" /><a href={website}>Website</a></Card.Description> }
-          { blog_link && <Card.Description><Icon name="globe" /><a href={blog_link}>{blog_link}</a></Card.Description> }
-          { twitter_link && <Card.Description><Icon name="twitter" /><a href={twitter_link}>{twitter_link}</a></Card.Description> }
-          { facebook_link && <Card.Description><Icon name="facebook" /><a href={facebook_link}>{facebook_link}</a></Card.Description> }
-          { youtube_link && <Card.Description><Icon name="youtube" /><a href={youtube_link}>{youtube_link}</a></Card.Description> }
-          { instagram_link && <Card.Description><Icon name="instagram" /><a href={instagram_link}>{instagram_link}</a></Card.Description> }
+          { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
+          { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
+          { phone_2 && <Card.Description><Icon name="phone" />{phone_label_2}: <a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
+          { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
+          { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
+          { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{blog_link}</a></Card.Description> }
+          { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{twitter_link}</a></Card.Description> }
+          { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{facebook_link}</a></Card.Description> }
+          { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{youtube_link}</a></Card.Description> }
+          { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
         </Segment>
         <Segment basic vertical>
           <ExpandableDescription label="Description" value={description} />
@@ -143,7 +143,7 @@ function MapMarkers ({listings, cardRefs}) {
                     <div className="description">{listing.description}</div>
                   </Card.Content>
                 </Segment>
-                <Link to={`/${listing.guid}`} onClick={() => { cardRefs[listing.guid].current.scrollIntoView({behavior: "smooth"}) }} className="listing-show-details">Show Details</Link>
+                <Link to={`/${listing.guid}`} onClick={() => { cardRefs[listing.guid].current?.scrollIntoView({behavior: "smooth"}) }} className="listing-show-details">Show Details</Link>
                 </Card.Content>
             </Card>
           </Popup>
