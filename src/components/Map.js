@@ -1,8 +1,9 @@
-import { createRef, forwardRef, useEffect, useState } from "react";
+import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, Sticky, List, Form, Icon } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, Sticky, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
+import { get, set } from 'lodash/fp'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
@@ -10,30 +11,55 @@ import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
-const getColor = index => [ "red", "orange", "yellow", "olive", "green", "teal", "blue", "violet", "purple", "pink", "brown" ][ index % 11 ]
+const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
+const getCategoryIcon = category => ({ "Leadership Opportunities": "flag", "Housing & Shelter": "home", "Work & Employment": "briefcase", "Mental Health": "heartbeat", "Specialized Assistance": "handshake", "Legal": "balance scale", "Education": "graduation cap", "Day Services & Drop-in": "sun", "Care & Safety": "hand holding heart", })[category]
 
 function MapPage({ listings }) {
-  const navigate = useNavigate()
-  const [ searchParams, setSearchParams ] = useSearchParams()
-  const [ search, updateSearch ] = useState()
-  const mapRef = createRef()
+  const [ searchParams, ] = useSearchParams()
+  const [ search, setSearch ] = useState()
   // todo: memoize these lines:
+  const categories = listings.reduce((categories, { category: fullCategory }) => {
+    const [category, subcategory] = fullCategory.split(`: `)
+    return set(`[${category}][${subcategory}]`)(1 + (get(`[${category}][${subcategory}]`)(categories) ?? 0))(categories)
+  }, {})
   const filteredListings = filterListings(listings, searchParams, search)
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
 
   return (<>
-    <Segment as={Form} color="pink" basic inverted>
-      <Container as={Form.Group}>
-        <Form.Input size="large" width={4} type="number" placeholder="Age" onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams.entries()), age: value })} />
-        <Form.Input size="large" width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => updateSearch(value)} />
-      </Container>
+    <MapNavigation categories={categories} search={search} setSearch={setSearch} />
+    <Container as="main">
+      <MapCards listings={filteredListings} cardRefs={cardRefs} />
+      <MapMap listings={filteredListings} cardRefs={cardRefs} />
+    </Container>
+  </>)
+}
+
+function MapNavigation({ categories, search, setSearch }) {
+  const navigate = useNavigate()
+  const [ searchParams, setSearchParams ] = useSearchParams()
+  return (<>
+    <Segment as="nav" color="black" basic vertical inverted>
+      <Grid as="menu" columns={Object.keys(categories).length} doubling container textAlign="center">
+      { Object.entries(categories).map(([category, subcategories]) =>
+        <Dropdown as="li" key={category} className="column" icon={null} text={<><Icon size="big" name={getCategoryIcon(category)} /><header>{category}</header></>}>
+          <Dropdown.Menu as="menu">
+          { Object.entries(subcategories).map(([subcategory, count]) =>
+            <Dropdown.Item key={subcategory} as={NavLink} text={`${subcategory} (${count})`} to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${category}: ${subcategory}` }).toString()}`} />
+          )}
+          </Dropdown.Menu>
+        </Dropdown>
+      ) }
+      </Grid>
+      <Form size="tiny" className="container">
+        <Grid>
+          <Grid.Column as={Form.Input} width={4} type="number" placeholder="Age" value={searchParams.get('age')} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), age: value })} />
+          <Grid.Column as={Form.Input} width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => setSearch(value)} />
+        </Grid>
+        <Label.Group as="menu" columns={[...searchParams].length} doubling container>
+          { [...searchParams].map(([key, value]) => value && <Label basic color="pink"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
+        </Label.Group>
+      </Form>
     </Segment>
-    <Ref innerRef={mapRef}>
-      <Container fluid as={Grid} stackable doubling reversed='computer' columns={2}>
-        <MapMap listings={filteredListings} mapRef={mapRef} cardRefs={cardRefs} />
-        <MapCards listings={filteredListings} cardRefs={cardRefs} />
-      </Container>
-    </Ref>
   </>)
 }
 
@@ -42,17 +68,17 @@ function MapCards({ listings, cardRefs }) {
   const currentCard = cardRefs[markerId]
   useEffect(() => currentCard && currentCard.current?.scrollIntoView({behavior: "smooth"}), [currentCard])
   return (
-    <Grid.Column as={Card.Group} itemsPerRow="1">
+    <Card.Group as="section" itemsPerRow="1">
       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} />)}
-    </Grid.Column>
+    </Card.Group>
   )
 }
 
 const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
   <Ref innerRef={ref}>
-    <Card color={getColor(index)} centered raised className="map-card">
+    <Card as="article" color={getColor(index)} centered raised className="map-card">
       <Card.Content>
-        { !!parent_organization && <Label as={Link} to={`/?parent_organization=${encodeURIComponent(parent_organization)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization}</Label> }
+        <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
         <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
         <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
         <Segment secondary>
@@ -99,33 +125,22 @@ const ValueList = ({ name, values }) => values && (
   </List>
 )
 
-function MapMap({ listings, mapRef, cardRefs }) {
+function MapMap({ listings, cardRefs }) {
   return (
-    <Grid.Column>
-      <Sticky context={mapRef} offset={14}>
-        <Segment as={MapContainer}
-          center={[44.0489388,-123.0919415]}
-          zoom={10}
-          minZoom={8}
-          maxZoom={18}
-          scrollWheelZoom={true}
-          tap={true}
-          dragging={true}
-          touchZoom={true}
-        >
-          <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-          <MapMarkers listings={listings} cardRefs={cardRefs} />
-        </Segment>
-      </Sticky>
-    </Grid.Column>
+    <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={true} tap={true} dragging={true} touchZoom={true}>
+      <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+      <MapMarkers listings={listings} cardRefs={cardRefs} />
+    </Segment>
   )
 }
 
 function MapMarkers ({listings, cardRefs}) {
   const { markerId } = useParams()
   const map = useMap()
-  const mappedListings = listings.filter(({ coords: [ lat, lon ] }) => lat && lon)
-  const currentCoords = listings.find(({ guid }) => guid === Number(markerId))?.coords
+  const mappedListings = useMemo(() => listings.filter(({ coords: [ lat, lon ] }) => lat && lon), [listings])
+  const currentCoords = useMemo(() => listings.find(({ guid }) => guid === Number(markerId))?.coords, [listings, markerId])
+  const bounds = useMemo(() => mappedListings.map(({coords}) => coords), [mappedListings])
+  useEffect(() => bounds.length && map.fitBounds(bounds), [map, bounds])
   useEffect(() => currentCoords && currentCoords[0] && currentCoords[1] && map.setView(currentCoords, 15), [map, currentCoords])
 
   return (<>
