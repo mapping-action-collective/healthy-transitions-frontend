@@ -8,7 +8,7 @@ function Page({children}) {
   return (<>
     <Segment as="header" basic vertical inverted>
       <Menu as="nav" size="massive" color="teal" secondary pointing className="container">
-        <Menu.Item as={NavLink} to="/" end><span className="mac-logo">Mapping Action Collective</span></Menu.Item>
+        <Menu.Item as={NavLink} to="/" end className="mac-logo">Mapping Action Collective</Menu.Item>
         <Menu.Item as={NavLink} to="/" end>Oregon Youth Resource Map</Menu.Item>
         <Menu.Item as={NavLink} to="/about" position="right"><header>About</header></Menu.Item>
         <Menu.Item as={NavLink} to="/suggest"><header>Suggest Upate</header></Menu.Item>

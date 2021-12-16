@@ -127,7 +127,7 @@ const ValueList = ({ name, values }) => values && (
 
 function MapMap({ listings, cardRefs }) {
   return (
-    <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={true} tap={true} dragging={true} touchZoom={true}>
+    <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
       <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
       <MapMarkers listings={listings} cardRefs={cardRefs} />
     </Segment>

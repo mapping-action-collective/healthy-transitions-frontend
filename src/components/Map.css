@@ -33,3 +33,9 @@
 @media only screen and (max-width:991px){
   .fixed.sticky { position: absolute !important; }
 }
+@media only screen and (max-width: 767px) {
+  #app > header > nav.menu { min-height: 0; }
+  #app > header > nav.menu > .item { font-size: medium; line-height: 2.5; }
+  #app > main { grid: 'leaflet-container' 'cards'; }
+  #app > main > div.leaflet-container { position: relative !important; top: 0px !important; z-index: 0; }
+}
