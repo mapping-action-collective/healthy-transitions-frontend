@@ -23,7 +23,7 @@
 .breadcrumb .label > strong { text-transform: capitalize; }
 
 .map-card .segment:empty { display: none; }
-.map-card .expandable.description:not(:focus-within, :hover), .leaflet-popup .description { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+/* .map-card .expandable.description:not(:focus-within, :hover), .leaflet-popup .description { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; } */
 .map-card .value-list > dt + dd::before { content: ": "; }
 .map-card .value-list > dd + dd::before { content: ", "; }
 .map-card .value-list > dt::after, .map-card .value-list > dd::after { content: none !important; }
