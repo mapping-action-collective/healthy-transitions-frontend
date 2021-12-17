@@ -11,7 +11,7 @@ function Page({children}) {
         <Menu.Item as={NavLink} to="/" end className="mac-logo">Mapping Action Collective</Menu.Item>
         <Menu.Item as={NavLink} to="/" end>Oregon Youth Resource Map</Menu.Item>
         <Menu.Item as={NavLink} to="/about" position="right"><header>About</header></Menu.Item>
-        <Menu.Item as={NavLink} to="/suggest"><header>Suggest Upate</header></Menu.Item>
+        <Menu.Item as={NavLink} to="/suggest"><header>Suggest Update</header></Menu.Item>
       </Menu>
     </Segment>
     {children}
