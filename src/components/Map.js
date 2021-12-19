@@ -75,11 +75,32 @@ function MapCards({ listings, cardRefs }) {
   )
 }
 
+const CardCornerDropdown = ({ index, guid, full_address='' }) => {
+  return (
+    <Dropdown icon='angle down' direction='left'>
+    <Dropdown.Menu>
+      {/* Not functional. Still needs logic.  */}
+      <Dropdown.Item id={guid} text='Save listing' icon={{ name: 'heart outline', color: getColor(index)}} onClick={() => console.log(guid)} />
+      {/* This works as expected: it copies the link listing url link of that card to the user's clipboard. 
+      TODO: add a UI element that says "Link copied!" or similar, so the user knows it was a success */}
+      <Dropdown.Item text='Copy link'icon='share alternate'
+      onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
+      />
+      {full_address && <Dropdown.Item as={Link} to={`/${guid}`} text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
+    </Dropdown.Menu>
+
+  </Dropdown>
+  )
+}
+
 const MapCard = forwardRef(({ searchParams, setSearchParams, listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
   <Ref innerRef={ref}>
     <Card as="article" color={getColor(index)} centered raised className="map-card">
       <Card.Content>
-        <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+        <div style={{ display: "flex", justifyContent: 'space-between'}}>
+          <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+          {CardCornerDropdown({index, guid, full_address})}
+          </div>
         <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
         <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
         <Segment secondary>
@@ -108,8 +129,9 @@ const MapCard = forwardRef(({ searchParams, setSearchParams, listing: { guid, ca
         </Segment>
         {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
       </Card.Content>
-      <Card.Content extra><NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
-      {keywords && keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
+      <Card.Content extra>
+        <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
+        { keywords && keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
       </Card.Content>
     </Card>
   </Ref>
