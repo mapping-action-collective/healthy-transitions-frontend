@@ -65,55 +65,57 @@ function MapNavigation({ categories, search, setSearch }) {
 
 function MapCards({ listings, cardRefs }) {
   const { markerId } = useParams()
-  const [ searchParams, setSearchParams ] = useSearchParams()
   const currentCard = cardRefs[markerId]
   useEffect(() => currentCard && currentCard.current?.scrollIntoView({behavior: "smooth"}), [currentCard])
   return (
     <Card.Group as="section" itemsPerRow="1">
-      {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} searchParams={searchParams} setSearchParams={setSearchParams} />)}
+      {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} />)}
     </Card.Group>
   )
 }
 
-const MapCard = forwardRef(({ searchParams, setSearchParams, listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
-  <Ref innerRef={ref}>
-    <Card as="article" color={getColor(index)} centered raised className="map-card">
-      <Card.Content>
-        <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
-        <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
-        <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
-        <Segment secondary>
-          { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
-          { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
-          { phone_2 && <Card.Description><Icon name="phone" />{phone_label_2}: <a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
-          { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
-          { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
-          { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{blog_link}</a></Card.Description> }
-          { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{twitter_link}</a></Card.Description> }
-          { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{facebook_link}</a></Card.Description> }
-          { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{youtube_link}</a></Card.Description> }
-          { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
-        </Segment>
-        <Segment basic vertical>
-          <ExpandableDescription label="Description" value={description} />
-        </Segment>
-        <Segment basic vertical>
-          { video_description && <Card.Description>Video description: <a href={video_description}>{video_description}</a></Card.Description> }
-        </Segment>
-        <Segment secondary>
-          { (min_age || max_age) && <Card.Description><Card.Header as="strong">Age:</Card.Header> {[ min_age, max_age ].join(`-`)}</Card.Description> }
-          { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
-          <ValueList name="Languages Offered" values={languages_offered} />
-          <ValueList name="Services" values={services_provided} />
-        </Segment>
-        {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
-      </Card.Content>
-      <Card.Content extra><NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
-      {keywords && keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
-      </Card.Content>
-    </Card>
-  </Ref>
-)
+const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) => {
+  const [ searchParams, setSearchParams ] = useSearchParams()
+  return (
+    <Ref innerRef={ref}>
+      <Card as="article" color={getColor(index)} centered raised className="map-card">
+        <Card.Content>
+          <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+          <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
+          <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
+          <Segment secondary>
+            { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
+            { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
+            { phone_2 && <Card.Description><Icon name="phone" />{phone_label_2}: <a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
+            { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
+            { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
+            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{blog_link}</a></Card.Description> }
+            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{twitter_link}</a></Card.Description> }
+            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{facebook_link}</a></Card.Description> }
+            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{youtube_link}</a></Card.Description> }
+            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
+          </Segment>
+          <Segment basic vertical>
+            <ExpandableDescription label="Description" value={description} />
+          </Segment>
+          <Segment basic vertical>
+            { video_description && <Card.Description>Video description: <a href={video_description}>{video_description}</a></Card.Description> }
+          </Segment>
+          <Segment secondary>
+            { (min_age || max_age) && <Card.Description><Card.Header as="strong">Age:</Card.Header> {[ min_age, max_age ].join(`-`)}</Card.Description> }
+            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
+            <ValueList name="Languages Offered" values={languages_offered} />
+            <ValueList name="Services" values={services_provided} />
+          </Segment>
+          {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
+        </Card.Content>
+        <Card.Content extra><NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
+        {keywords?.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
+        </Card.Content>
+      </Card>
+    </Ref>
+  )
+})
 
 const ExpandableDescription = ({ label, value }) => <>
     { label && <Card.Header as="strong">{label}:</Card.Header> }
