@@ -79,16 +79,24 @@ const CardCornerDropdown = ({ index, guid, full_address='' }) => {
   return (
     <Dropdown icon='angle down' direction='left'>
     <Dropdown.Menu>
-      {/* Not functional. Still needs logic.  */}
-      <Dropdown.Item id={guid} text='Save listing' icon={{ name: 'heart outline', color: getColor(index)}} onClick={() => console.log(guid)} />
-      {/* This works as expected: it copies the link listing url link of that card to the user's clipboard. 
-      TODO: add a UI element that says "Link copied!" or similar, so the user knows it was a success */}
+
+      {/* Proposed optonal UI element for saving listings */}
+      {/* <Dropdown.Item id={guid} text='Save listing' icon={{ name: 'heart outline', color: getColor(index)}} onClick={() => console.log(guid)} /> */}
+
+      {/* This copies the URL of the card to the user's clipboard. 
+      - TODO: add a UI element that conveys "Link copied!" on success 
+      - TODO: investigate accessibility of Semantic UI dropdowns.
+      */}
       <Dropdown.Item text='Copy link'icon='share alternate'
       onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
       />
-      {full_address && <Dropdown.Item as={Link} to={`/${guid}`} text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
-    </Dropdown.Menu>
 
+      {/* Links to map when applicable. Does not display on cards with no address.  */}
+      {full_address && <Dropdown.Item as={Link} to={`/${guid}`} text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
+
+      {/* External link to Google feedback form, as requested by HT youth  */}
+      <Dropdown.Item as={'a'} href='https://forms.gle/Ldo4ortzkNHDxSGB8' target='_blank' text='Comment'icon={{ name: 'chat outline', color: getColor(index)}} />
+    </Dropdown.Menu>
   </Dropdown>
   )
 }
