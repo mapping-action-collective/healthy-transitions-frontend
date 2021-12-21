@@ -12,7 +12,7 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
-const getCategoryIcon = category => ({ "Leadership Opportunities": "flag", "Housing & Shelter": "home", "Work & Employment": "briefcase", "Mental Health": "heartbeat", "Specialized Assistance": "handshake", "Legal": "balance scale", "Education": "graduation cap", "Day Services & Drop-in": "sun", "Care & Safety": "hand holding heart", })[category]
+const getCategoryIcon = category => ({ "Basic Needs": "utensils", "Care & Safety": "hand holding heart", "Crisis Resources": "exclamation triangle", "Education": "graduation cap", "Day Services & Drop-in": "sun", "Financial": "money bill alternate outline icon", "Health & Wellness": "first aid", "Housing & Shelter": "home", "Leadership Opportunities": "flag", "Legal": "balance scale", "Mental Health": "heartbeat", "Specialized Assistance": "handshake", "Transportation": "bus", "Work & Employment": "briefcase", })[category]
 
 function MapPage({ listings }) {
   const [ searchParams, ] = useSearchParams()
