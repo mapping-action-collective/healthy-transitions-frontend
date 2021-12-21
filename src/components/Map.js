@@ -65,20 +65,50 @@ function MapNavigation({ categories, search, setSearch }) {
 
 function MapCards({ listings, cardRefs }) {
   const { markerId } = useParams()
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const currentCard = cardRefs[markerId]
   useEffect(() => currentCard && currentCard.current?.scrollIntoView({behavior: "smooth"}), [currentCard])
   return (
     <Card.Group as="section" itemsPerRow="1">
-      {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} />)}
+      {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} searchParams={searchParams} setSearchParams={setSearchParams} />)}
     </Card.Group>
   )
 }
 
-const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
+const CardCornerDropdown = ({ index, guid, full_address='' }) => {
+  return (
+    <Dropdown icon='angle down' direction='left'>
+    <Dropdown.Menu>
+
+      {/* Proposed optonal UI element for saving listings */}
+      {/* <Dropdown.Item id={guid} text='Save listing' icon={{ name: 'heart outline', color: getColor(index)}} onClick={() => console.log(guid)} /> */}
+
+      {/* This copies the URL of the card to the user's clipboard. 
+      - TODO: add a UI element that conveys "Link copied!" on success 
+      - TODO: investigate accessibility of Semantic UI dropdowns.
+      */}
+      <Dropdown.Item text='Copy link'icon='share alternate'
+      onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
+      />
+
+      {/* Links to map when applicable. Does not display on cards with no address.  */}
+      {full_address && <Dropdown.Item as={Link} to={`/${guid}`} text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
+
+      {/* External link to Google feedback form, as requested by HT youth  */}
+      <Dropdown.Item as={'a'} href='https://forms.gle/Ldo4ortzkNHDxSGB8' target='_blank' text='Comment'icon={{ name: 'chat outline', color: getColor(index)}} />
+    </Dropdown.Menu>
+  </Dropdown>
+  )
+}
+
+const MapCard = forwardRef(({ searchParams, setSearchParams, listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) =>
   <Ref innerRef={ref}>
     <Card as="article" color={getColor(index)} centered raised className="map-card">
       <Card.Content>
-        <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+        <div style={{ display: "flex", justifyContent: 'space-between'}}>
+          <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+          {CardCornerDropdown({index, guid, full_address})}
+          </div>
         <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
         <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
         <Segment secondary>
@@ -103,12 +133,14 @@ const MapCard = forwardRef(({ listing: { guid, category, coords, parent_organiza
           { (min_age || max_age) && <Card.Description><Card.Header as="strong">Age:</Card.Header> {[ min_age, max_age ].join(`-`)}</Card.Description> }
           { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
           <ValueList name="Languages Offered" values={languages_offered} />
-          <ValueList name="Services Provided" values={services_provided} />
-          <ValueList name="Keywords" values={keywords} />
+          <ValueList name="Services" values={services_provided} />
         </Segment>
         {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
       </Card.Content>
-      <Card.Content extra><NavLink to={`/?category=${encodeURIComponent(category)}`}># {category}</NavLink></Card.Content>
+      <Card.Content extra>
+        <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
+        { keywords && keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
+      </Card.Content>
     </Card>
   </Ref>
 )
