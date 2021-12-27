@@ -8,16 +8,18 @@ import Map from './components/Map'
 
 import { getListings } from './data'
 import { formatListings } from './utils'
+import About from './components/About'
+import SuggestUpdate from './components/SuggestUpdate'
 
 function App({listings}) {
   return (
     <Router>
       <Page>
         <Routes>
-          <Route>
-            <Route path="/" element={<Map listings={listings} />} />
-            <Route path=":markerId" element={<Map listings={listings} />} />
-          </Route>
+          <Route path="/about" element={<About />} />
+          <Route path="/suggest" element={<SuggestUpdate />} />
+          <Route path="/" element={<Map listings={listings} />} />
+          <Route path=":markerId" element={<Map listings={listings} />} />
         </Routes>
       </Page>
     </Router>

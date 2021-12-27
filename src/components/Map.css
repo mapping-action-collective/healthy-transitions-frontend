@@ -1,29 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz&display=swap');
 
+#map-nav > form > .labels { padding: 0; margin: 0; }
+#map-nav > form > .labels > .label { text-transform: capitalize; }
+
 .leaflet-container { height: 68vh; }
-/* #app { display: grid; grid-template-areas: "header header" "nav nav" "stickynav stickynav" "cards map"; grid-template-columns: minmax(100px, auto) minmax(100px, auto); grid-template-rows: min-content min-content min-content 1fr; column-gap: 1em; } */
 
-#app { height: auto; }
-#app > header { display: sticky; z-index: 2; }
-#app > nav > form > .labels { padding: 0; margin: 0; }
-#app > nav > form > .labels > .label { text-transform: capitalize; }
+#map-page { display: grid; grid: 'cards leaflet-container' / 1fr 1fr; gap: 1em; }
+#map-page > .cards { grid-area: cards; width: auto; margin-top: 1rem; }
+#map-page > .cards > .card:first-child { margin-top: 0; }
+#map-page > .leaflet-container { grid-area: leaflet-container; width: auto; position: sticky !important; top: 72px; z-index: 2; }
 
-#app > main { display: grid; grid: 'cards leaflet-container' / 1fr 1fr; gap: 1em; }
-#app > main > .cards { grid-area: cards; width: auto; margin-top: 1rem; }
-#app > main > .cards > .card:first-child { margin-top: 0; }
-#app > main > .leaflet-container { grid-area: leaflet-container; width: auto; position: sticky !important; top: 72px; z-index: 2; }
-
-#app .mac-logo { text-transform: uppercase !important; white-space: pre; color: white !important; opacity: 0.75; }
-
-#app > header { position: sticky; top: 0px; z-index: 2; padding: 0; background-color: #292e36; }
-#app > header > nav { font-family: 'Yanone Kaffeesatz', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
-#app > header > nav > .item { padding: 2px 0.25em 0; font-size: larger; line-height: 2.5; color: white; }
-#app > main nav.filters { position: sticky; top: 58px; z-index: 2; }
-#app > main > nav > .ui.form .field { margin-bottom: 0; }
-.breadcrumb .label > strong { text-transform: capitalize; }
+#map-page nav.filters { position: sticky; top: 58px; z-index: 2; }
+#map-page > nav > .ui.form .field { margin-bottom: 0; }
+#map-page .breadcrumb .label > strong { text-transform: capitalize; }
 
 .map-card .segment:empty { display: none; }
-/* .map-card .expandable.description:not(:focus-within, :hover), .leaflet-popup .description { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; } */
 .map-card .value-list > dt + dd::before { content: ": "; }
 .map-card .value-list > dd + dd::before { content: ", "; }
 .map-card .value-list > dt::after, .map-card .value-list > dd::after { content: none !important; }
@@ -37,6 +28,6 @@
   #app > header > nav.menu { min-height: 0; }
   #app > header > nav.menu > .item { font-size: medium; line-height: 2.5; }
   #app > header > nav.menu > .item.mac-logo { display: none; }
-  #app > main { grid: 'leaflet-container' 'cards'; }
-  #app > main > div.leaflet-container { position: relative !important; top: 0px !important; z-index: 0; }
+  #map-page { grid: 'leaflet-container' 'cards'; }
+  #map-page > div.leaflet-container { position: relative !important; top: 0px !important; z-index: 0; }
 }

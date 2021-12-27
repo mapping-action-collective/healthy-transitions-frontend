@@ -1,2 +1,9 @@
-#app { height: 100%; display: flex; flex-flow: column nowrap; }
-#app > main { flex: 1 1 auto; display: flex; flex-flow: column nowrap; }
+#app { height: auto; display: flex; flex-flow: column nowrap; min-height: 100vh; }
+
+#app > header { position: sticky; top: 0px; z-index: 2; padding: 0; background-color: #292e36; }
+#app > header > nav.menu { font-family: 'Yanone Kaffeesatz', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
+#app > header > nav.menu > .item { padding: 2px 0.25em 0; font-size: larger; line-height: 2.5; color: white; }
+
+#app > main { flex: 1 1 auto; }
+
+.mac-logo { text-transform: uppercase !important; white-space: pre; color: white !important; opacity: 0.75; }
