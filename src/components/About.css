@@ -1,0 +1,3 @@
+#about-page, #about-page > article { flex: 1 0; display: flex; flex-flow: column; }
+#about-page > article > figure { margin: auto 0 0; align-self: flex-end; }
+#about-page > article > figure > figcaption { margin: 1rem 0; }
