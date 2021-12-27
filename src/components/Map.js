@@ -1,6 +1,6 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, Sticky, List, Form, Icon, Dropdown } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { get, set } from 'lodash/fp'
@@ -27,7 +27,7 @@ function MapPage({ listings }) {
 
   return (<>
     <MapNavigation categories={categories} search={search} setSearch={setSearch} />
-    <Container as="main">
+    <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} />
     </Container>
@@ -38,7 +38,7 @@ function MapNavigation({ categories, search, setSearch }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   return (<>
-    <Segment as="nav" color="black" basic vertical inverted>
+    <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <Grid as="menu" columns={Object.keys(categories).length} doubling container textAlign="center">
       { Object.entries(categories).map(([category, subcategories]) =>
         <Dropdown as="li" key={category} className="column" icon={null} text={<><Icon size="big" name={getCategoryIcon(category)} /><header>{category}</header></>}>
