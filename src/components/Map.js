@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-ro
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
-import { get, set } from 'lodash/fp'
+import { get, max, set } from 'lodash/fp'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
@@ -134,7 +134,10 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { video_description && <Card.Description>Video description: <a href={video_description}>{video_description}</a></Card.Description> }
           </Segment>
           <Segment secondary>
-            { (min_age || max_age) && <Card.Description><Card.Header as="strong">Age:</Card.Header> {[ min_age, max_age ].join(`-`)}</Card.Description> }
+            { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Age:</Card.Header> {min_age}-{max_age}</Card.Description>
+            : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
+            : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
+            : null }
             { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
             <ValueList name="Languages Offered" values={languages_offered} />
             <ValueList name="Services" values={services_provided} />
