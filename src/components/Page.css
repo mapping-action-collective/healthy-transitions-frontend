@@ -1,5 +1,5 @@
-html { scroll-padding-top: 72px; }
-#app { height: auto; display: flex; flex-flow: column nowrap; min-height: 100vh; }
+html, body { overflow: hidden; }
+#app { height: 100vh; display: flex; flex-flow: column nowrap; scroll-padding-top: 72px; overflow-y: auto; scroll-behavior: smooth; scroll-snap-type: y proximity; }
 
 #app > header { position: sticky; top: 0px; z-index: 2; padding: 0; background-color: #292e36; }
 #app > header > nav.menu { font-family: 'Yanone Kaffeesatz', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }

@@ -8,6 +8,7 @@
 #map-page { display: grid; grid: 'cards leaflet-container' / 1fr 1fr; gap: 1em; }
 #map-page > .cards { grid-area: cards; width: auto; margin-top: 1rem; }
 #map-page > .cards > .card:first-child { margin-top: 0; }
+#map-page > .cards > .card { scroll-snap-align: start; }
 #map-page > .leaflet-container { grid-area: leaflet-container; width: auto; position: sticky !important; top: 72px; z-index: 2; }
 
 #map-page nav.filters { position: sticky; top: 58px; z-index: 2; }
