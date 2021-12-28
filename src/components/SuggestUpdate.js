@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Tab } from 'semantic-ui-react'
+import { Container, Header, Menu, Tab } from 'semantic-ui-react'
 
 import './SuggestUpdate.css'
 
@@ -20,7 +20,7 @@ function SuggestUpdate () {
   return (
     <Container as="main" id="suggest-update-page">
       <Tab className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
-        menuItem: name,
+        menuItem: <Menu.Item key={name} as={Header}>{name}</Menu.Item>,
         render: () => <Tab.Pane content={<iframe title={description} src={url} frameborder="0" marginheight="0" marginwidth="0" />} />,
       }))} />
     </Container>
