@@ -1,28 +1,39 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
 import {HashRouter as Router, Route, Routes} from 'react-router-dom'
 
-import './index.css';
+import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
 
-import getData from './data'
-import { formatMapData } from './utils';
+import { getListings } from './data'
+import { formatListings } from './utils'
+import About from './components/About'
+import SuggestUpdate from './components/SuggestUpdate'
 
-function App({mapData}) {
+function App({listings}) {
   return (
     <Router>
       <Page>
         <Routes>
-          <Route>
-            <Route path="/" element={<Map mapData={mapData} />} />
-            <Route path=":markerId" element={<Map mapData={mapData} />} />
-          </Route>
+          <Route path="/about" element={<About />} />
+          <Route path="/suggest" element={<SuggestUpdate />} />
+          <Route path="/" element={<Map listings={listings} />} />
+          <Route path=":markerId" element={<Map listings={listings} />} />
         </Routes>
       </Page>
     </Router>
-  );
+  )
 }
 
-const API_URL = new URL(window.location).searchParams.get('api') || `https://hto2020-backend-production.herokuapp.com/api`
-getData(API_URL).then(data => ReactDOM.render(<App mapData={formatMapData(data)} />, window.app))
+const CURRENT_URL = new URL(window.location)
+const API_URL =
+  CURRENT_URL.searchParams.get('api') ?? (
+  CURRENT_URL.hostname === `localhost` ? `http://localhost:5050/api`
+: CURRENT_URL.hostname === `hto2020-frontend-staging.herokuapp.com` ? `https://hto2020-backend-staging.herokuapp.com/api`
+: `https://hto2020-backend-production.herokuapp.com/api`
+)
+
+Promise
+  .all([ getListings(API_URL) ])
+  .then(([ listings ]) => ReactDOM.render(<App listings={formatListings(listings)} />, window.app))

@@ -1,0 +1,4 @@
+#suggest-update-page { display: flex; flex-flow: column nowrap; }
+#suggest-update-page .embed { flex: 1 1 100%; margin: 1rem 0; display: flex; flex-flow: column nowrap; }
+#suggest-update-page .tab { flex: 1 1 100%; display: flex; padding: 0; }
+#suggest-update-page iframe { flex: 1 0 100%; }

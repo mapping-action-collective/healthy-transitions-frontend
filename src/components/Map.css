@@ -1,5 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz&display=swap');
+
+#map-nav { scroll-snap-align: start; }
+#map-nav > form > .labels { padding: 0; margin: 0; }
+#map-nav > form > .labels > .label { text-transform: capitalize; }
+
 .leaflet-container { height: 68vh; }
+
+#map-page { display: grid; grid: 'cards leaflet-container' / 1fr 1fr; gap: 1em; }
+#map-page > .cards { grid-area: cards; width: auto; margin-top: 1rem; }
+#map-page > .cards > .card:first-child { margin-top: 0; }
+#map-page > .cards > .card { scroll-snap-align: start; }
+#map-page > .leaflet-container { grid-area: leaflet-container; width: auto; position: sticky !important; top: 72px; z-index: 2; }
+#map-page .leaflet-popup-content .description { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+#map-page nav.filters { position: sticky; top: 58px; z-index: 2; }
+#map-page > nav > .ui.form .field { margin-bottom: 0; }
+#map-page .breadcrumb .label > strong { text-transform: capitalize; }
+
+.map-card .segment:empty { display: none; }
+.map-card .value-list > dt + dd::before { content: ": "; }
+.map-card .value-list > dd + dd::before { content: ", "; }
+.map-card .value-list > dt::after, .map-card .value-list > dd::after { content: none !important; }
+.map-card .value-list > dt { font-weight: bold; }
+.map-card .value-list > dd { display: contents !important; margin: 0 !important; }
 
 @media only screen and (max-width:991px){
   .fixed.sticky { position: absolute !important; }
+}
+@media only screen and (max-width: 767px) {
+  #app > header > nav.menu { min-height: 0; }
+  #app > header > nav.menu > .item { font-size: medium; line-height: 2.5; }
+  #app > header > nav.menu > .item.mac-logo { display: none; }
+  #map-page { grid: 'leaflet-container' 'cards'; }
+  #map-page > div.leaflet-container { position: relative !important; top: 0px !important; z-index: 0; }
 }
