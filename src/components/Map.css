@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Yanone+Kaffeesatz&display=swap');
 
+#map-nav { scroll-snap-align: start; }
 #map-nav > form > .labels { padding: 0; margin: 0; }
 #map-nav > form > .labels > .label { text-transform: capitalize; }
 
@@ -10,6 +11,7 @@
 #map-page > .cards > .card:first-child { margin-top: 0; }
 #map-page > .cards > .card { scroll-snap-align: start; }
 #map-page > .leaflet-container { grid-area: leaflet-container; width: auto; position: sticky !important; top: 72px; z-index: 2; }
+#map-page .leaflet-popup-content .description { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
 #map-page nav.filters { position: sticky; top: 58px; z-index: 2; }
 #map-page > nav > .ui.form .field { margin-bottom: 0; }
