@@ -1,9 +1,9 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
-import { Link, useParams, useNavigate, useSearchParams, NavLink } from "react-router-dom";
+import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
-import { get, max, set } from 'lodash/fp'
+import { get, set } from 'lodash/fp'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
@@ -22,7 +22,7 @@ function MapPage({ listings }) {
     const [category, subcategory] = fullCategory.split(`: `)
     return set(`[${category}][${subcategory}]`)(1 + (get(`[${category}][${subcategory}]`)(categories) ?? 0))(categories)
   }, {})
-  const filteredListings = filterListings(listings, searchParams, search)
+  const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
@@ -53,11 +53,11 @@ function MapNavigation({ categories, search, setSearch }) {
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
-          <Grid.Column as={Form.Input} width={4} type="number" placeholder="Age" value={searchParams.get('age')} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), age: value })} />
+          <Grid.Column as={Form.Input} width={4} type="number" placeholder="Age" value={searchParams.get('age') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), age: value })} />
           <Grid.Column as={Form.Input} width={12} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => setSearch(value)} />
         </Grid>
-        <Label.Group as="menu" columns={[...searchParams].length} doubling container>
-          { [...searchParams].map(([key, value]) => value && <Label basic color="pink"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
+        <Label.Group as="menu" columns={[...searchParams].length} className="doubling container">
+          { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="pink"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
         </Label.Group>
       </Form>
     </Segment>
@@ -65,9 +65,13 @@ function MapNavigation({ categories, search, setSearch }) {
 }
 
 function MapCards({ listings, cardRefs, mapRef }) {
+  const location = useLocation()
   const { markerId } = useParams()
   const currentCard = cardRefs[markerId]
-  useEffect(() => currentCard && currentCard.current?.scrollIntoView({behavior: "smooth"}), [currentCard])
+  useEffect(() => {
+    if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
+    else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
+  }, [currentCard, location, mapRef])
   return (
     <Card.Group as="section" itemsPerRow="1">
       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)}
@@ -76,10 +80,9 @@ function MapCards({ listings, cardRefs, mapRef }) {
 }
 
 const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
-  const [ searchParams, ] = useSearchParams()
   const navigate = useNavigate()
   return (
-    <Dropdown icon='angle down' direction='left' onFocus={() => navigate(`/${guid}?${searchParams.toString()}`)}>
+    <Dropdown icon='angle down' direction='left'>
       <Dropdown.Menu>
 
         {/* Proposed optonal UI element for saving listings */}
@@ -94,16 +97,17 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
         />
 
         {/* Links to map when applicable. Does not display on cards with no address.  */}
-        {full_address && <Dropdown.Item onClick={() => { mapRef.current?.scrollIntoView({ behavior: 'smooth' }) }} text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
+        {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
 
         {/* External link to Google feedback form, as requested by HT youth  */}
-        <Dropdown.Item as={'a'} href='https://forms.gle/Ldo4ortzkNHDxSGB8' target='_blank' text='Comment'icon={{ name: 'chat outline', color: getColor(index)}} />
+        <Dropdown.Item as="a" href='https://forms.gle/Ldo4ortzkNHDxSGB8' target='_blank' text='Comment'icon={{ name: 'chat', color: getColor(index)}} />
       </Dropdown.Menu>
     </Dropdown>
   )
 }
 
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, phone_1, phone_label_1, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) => {
+  const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   return (
     <Ref innerRef={ref}>
@@ -114,7 +118,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             {CardCornerDropdown({index, guid, full_address, mapRef})}
             </div>
           <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
-          <Card.Meta><Link to={`/${guid}`}>{full_address}</Link></Card.Meta>
+          { full_address && <Card.Meta style={{ cursor: 'pointer' }} onClick={() => { navigate(`/${guid}`, { state: { scrollToMap: true } }) }} title="View on map"><Icon name="map marker alternate" /> {full_address}</Card.Meta> }
           <Segment secondary>
             { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
             { phone_1 && <Card.Description><Icon name="phone" />{phone_label_1}: <a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a></Card.Description> }
