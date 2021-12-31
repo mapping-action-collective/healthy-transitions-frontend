@@ -6,13 +6,13 @@ import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { get, max, set } from 'lodash/fp'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
-
+import { CATEGORY_ICONS } from "../constants";
 import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
-const getCategoryIcon = category => ({ "Leadership Opportunities": "flag", "Housing & Shelter": "home", "Work & Employment": "briefcase", "Mental Health": "heartbeat", "Specialized Assistance": "handshake", "Legal": "balance scale", "Education": "graduation cap", "Day Services & Drop-in": "sun", "Care & Safety": "hand holding heart", })[category]
+const getCategoryIcon = category => (CATEGORY_ICONS)[category]
 
 function MapPage({ listings }) {
   const [ searchParams, ] = useSearchParams()
