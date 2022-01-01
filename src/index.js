@@ -6,20 +6,20 @@ import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
 
-import { getListings } from './data'
+import { getListings, getListingCategories } from './data'
 import { formatListings } from './utils'
 import About from './components/About'
 import SuggestUpdate from './components/SuggestUpdate'
 
-function App({listings}) {
+function App({listings, listingCategoryIcons}) {
   return (
     <Router>
       <Page>
         <Routes>
           <Route path="/about" element={<About />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
-          <Route path="/" element={<Map listings={listings} />} />
-          <Route path=":markerId" element={<Map listings={listings} />} />
+          <Route path="/" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
+          <Route path=":markerId" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
         </Routes>
       </Page>
     </Router>
@@ -35,5 +35,8 @@ const API_URL =
 )
 
 Promise
-  .all([ getListings(API_URL) ])
-  .then(([ listings ]) => ReactDOM.render(<App listings={formatListings(listings)} />, window.app))
+  .all([
+    getListings(API_URL),
+    getListingCategories(API_URL),
+  ])
+  .then(([ listings, listingCategoryIcons ]) => ReactDOM.render(<App listings={formatListings(listings)} listingCategoryIcons={listingCategoryIcons} />, window.app))
