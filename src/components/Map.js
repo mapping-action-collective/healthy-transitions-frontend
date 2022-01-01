@@ -12,22 +12,22 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
-const getCategoryIcon = category => ({ "Leadership Opportunities": "flag", "Housing & Shelter": "home", "Work & Employment": "briefcase", "Mental Health": "heartbeat", "Specialized Assistance": "handshake", "Legal": "balance scale", "Education": "graduation cap", "Day Services & Drop-in": "sun", "Care & Safety": "hand holding heart", })[category]
 
-function MapPage({ listings }) {
+function MapPage({ listings, listingCategoryIcons }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
-  // todo: memoize these lines:
-  const categories = listings.reduce((categories, { category: fullCategory }) => {
-    const [category, subcategory] = fullCategory.split(`: `)
-    return set(`[${category}][${subcategory}]`)(1 + (get(`[${category}][${subcategory}]`)(categories) ?? 0))(categories)
-  }, {})
+
+  const listingCategories = useMemo(() =>
+    listings.reduce((listingCategories, listing) => {
+      const [ parentCategory, subCategory ] = listing.category.split(`: `)
+      return set(`[${parentCategory}][${subCategory}]`)(1 + (get(`[${parentCategory}][${subCategory}]`)(listingCategories) ?? 0))(listingCategories)
+    }, {}), [listings])
   const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
   return (<>
-    <MapNavigation categories={categories} search={search} setSearch={setSearch} />
+    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -35,17 +35,18 @@ function MapPage({ listings }) {
   </>)
 }
 
-function MapNavigation({ categories, search, setSearch }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, search, setSearch }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  console.log(listingCategoryIcons)
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
-      <Grid as="menu" columns={Object.keys(categories).length} doubling container textAlign="center">
-      { Object.entries(categories).map(([category, subcategories]) =>
-        <Dropdown as="li" key={category} className="column" icon={null} text={<><Icon size="big" name={getCategoryIcon(category)} /><header>{category}</header></>}>
+      <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
+      { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
+        <Dropdown as="li" key={parentCategory} className="column" icon={null} text={<><Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} /><header>{parentCategory}</header></>}>
           <Dropdown.Menu as="menu">
-          { Object.entries(subcategories).map(([subcategory, count]) =>
-            <Dropdown.Item key={subcategory} as={NavLink} text={`${subcategory} (${count})`} to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${category}: ${subcategory}` }).toString()}`} />
+          { Object.entries(subCategories).map(([subCategory, count]) =>
+            <Dropdown.Item key={subCategory} as={NavLink} text={`${subCategory} (${count})`} to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
           )}
           </Dropdown.Menu>
         </Dropdown>
