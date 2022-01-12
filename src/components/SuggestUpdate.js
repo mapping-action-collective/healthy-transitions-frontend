@@ -10,7 +10,7 @@ const FORMS = [
     "description": "Give feedback on the site, comment on a specific listing, or report a bug."
   },
   {
-    "name": "Submit a Resource", 
+    "name": "Volunteer Form", 
     "url": "https://airtable.com/embed/shr9VN9Nzld508yVh?backgroundColor=teal", 
     "description": "For Healthy Transitions youth volunteers to enter program information"
   },
@@ -21,10 +21,10 @@ const FORMS = [
   },
 ]
 
-function SuggestUpdate () {
+function SuggestUpdate ({activeIndex=0}) {
   return (
     <Container as="main" id="suggest-update-page">
-      <Tab className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
+      <Tab defaultActiveIndex={activeIndex} className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
         menuItem: <Menu.Item key={name} as={Header}>{name}</Menu.Item>,
         render: () => <Tab.Pane content={<iframe title={description} src={url} frameborder="0" marginheight="0" marginwidth="0" />} />,
       }))} />

@@ -17,7 +17,9 @@ function App({listings, listingCategoryIcons}) {
       <Page>
         <Routes>
           <Route path="/about" element={<About />} />
-          <Route path="/suggest" element={<SuggestUpdate />} />
+          <Route path="/suggest" element={<SuggestUpdate activeIndex={0} />} />
+          <Route path="/suggest/youth" element={<SuggestUpdate activeIndex={1} />} />
+          <Route path="/suggest/providers" element={<SuggestUpdate activeIndex={2} />} />
           <Route path="/" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
           <Route path=":markerId" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
         </Routes>
