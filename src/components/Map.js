@@ -85,23 +85,9 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
   return (
     <Dropdown icon='angle down' direction='left'>
       <Dropdown.Menu>
-
-        {/* Proposed optonal UI element for saving listings */}
-        {/* <Dropdown.Item id={guid} text='Save listing' icon={{ name: 'heart outline', color: getColor(index)}} onClick={() => console.log(guid)} /> */}
-
-        {/* This copies the URL of the card to the user's clipboard. 
-        - TODO: add a UI element that conveys "Link copied!" on success 
-        - TODO: investigate accessibility of Semantic UI dropdowns.
-        */}
-        <Dropdown.Item text='Copy link'icon='share alternate'
-        onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
-        />
-
-        {/* Links to map when applicable. Does not display on cards with no address.  */}
+        <Dropdown.Item text='Copy link'icon='share alternate' onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)} />
         {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
-
-        {/* External link to Google feedback form, as requested by HT youth  */}
-        <Dropdown.Item as="a" href='https://forms.gle/Ldo4ortzkNHDxSGB8' target='_blank' text='Comment'icon={{ name: 'chat', color: getColor(index)}} />
+        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment'icon={{ name: 'chat', color: getColor(index)}} />
       </Dropdown.Menu>
     </Dropdown>
   )

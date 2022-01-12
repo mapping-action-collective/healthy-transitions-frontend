@@ -10,15 +10,15 @@ const FORMS = [
     "description": "Give feedback on the site, comment on a specific listing, or report a bug."
   },
   {
+    "name": "Submit a Resource", 
+    "url": "https://airtable.com/embed/shr9VN9Nzld508yVh?backgroundColor=teal", 
+    "description": "For Healthy Transitions youth volunteers to enter program information"
+  },
+  {
     "name": "Provider Form",
     "url": "https://airtable.com/embed/shrs930yggxthL5e4?backgroundColor=teal",
     "description": "For social service providers to enter or update their agency's information shown on the Map."
   },
-  {
-    "name": "Youth Volunteers", 
-    "url": "https://airtable.com/embed/shr9VN9Nzld508yVh?backgroundColor=teal", 
-    "description": "For Healthy Transitions youth volunteers to enter program information"
-  }
 ]
 
 function SuggestUpdate () {
