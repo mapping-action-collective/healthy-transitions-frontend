@@ -1,5 +1,6 @@
 import React from 'react'
 import { Container, Header, Menu, Tab } from 'semantic-ui-react'
+import { useParams } from 'react-router-dom'
 
 import './SuggestUpdate.css'
 
@@ -21,10 +22,12 @@ const FORMS = [
   },
 ]
 
-function SuggestUpdate ({activeIndex=0}) {
+function SuggestUpdate () {
+  const { activeIndex } = useParams()
   return (
     <Container as="main" id="suggest-update-page">
-      <Tab defaultActiveIndex={activeIndex} className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
+      {/* 0, 1 and 2 are the only valid params. Everything else defaults to 0 */}
+      <Tab defaultActiveIndex={(activeIndex <= 2 && activeIndex <= 0) ? activeIndex : 0} className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
         menuItem: <Menu.Item key={name} as={Header}>{name}</Menu.Item>,
         render: () => <Tab.Pane content={<iframe title={description} src={url} frameborder="0" marginheight="0" marginwidth="0" />} />,
       }))} />
