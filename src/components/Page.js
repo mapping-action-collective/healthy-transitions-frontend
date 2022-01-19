@@ -1,10 +1,13 @@
-import { NavLink } from 'react-router-dom'
+import { useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom'
 import { Menu, Segment } from 'semantic-ui-react'
 
 import 'semantic-ui-css/semantic.min.css'
 import './Page.css'
 
 function Page({children}) {
+  let location = useLocation();
+  useEffect(() => window.gtag('event', 'page_view', { 'page_location': window.location, 'page_path': location.pathname + location.hash }) || console.log(location), [location])
   return (<>
     <Segment as="header" basic vertical inverted>
       <Menu as="nav" size="massive" color="teal" secondary pointing className="container">
