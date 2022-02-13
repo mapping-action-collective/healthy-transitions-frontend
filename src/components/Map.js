@@ -13,9 +13,9 @@ import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
-  // list of 100 largest cities/towns in Oregon, from Wikipedia
-  // TODO: finish this list to include ALL Oregon cities/towns
-  const cities = ['Portland', 'Eugene', 'Salem', 'Gresham', 'Hillsboro', 'Bend', 'Beaverton', 'Medford', 'Springfield', 'Corvalis', 'Albany', 'Tigard', 'Lake Oswego', 'Keizer', 'Grants Pass', 'Oregon City', 'McMinnville', 'Redmond', 'Tualatin', 'West Linn', 'Wilsonville', 'Forest Grove', 'Woodburn', 'Newberg', 'Happy Valley', 'Roseburg', 'Klamath Falls', 'Ashland', 'Milwaukie', 'Sherwood', 'Hermiston', 'Central Point', 'Lebanon', 'Canby', 'Pendleton', 'Dallas', 'Troutdale', 'The Dalles', 'Coos Bay', 'St. Helens', 'La Grande', 'Cornelius', 'Sandy', 'Gladstone', 'Ontario', 'Monmouth', 'Prineville', 'Cottage Grove', 'Silverton', 'Fairview', 'North Bend', 'Newport', 'Mololla', 'Astoria', 'Baker City', 'Independence', 'Sweet Home', 'Lincoln City', 'Eagle Point', 'Florence', 'Sutherlin', 'Hood River', 'Stayton', 'Scappoose', 'Madras', 'Umatilla', 'Milton-Freewater', 'Seaside', 'Junction City', 'Brookings', 'Talent', 'Warrenton', 'Creswell', 'Winston', 'Philomath', 'Veneta', 'Tillamook', 'King City', 'Sheridan', 'Pheonix', 'Lafayette', 'Wood Village', 'Estacada', 'Reedsport', 'Aumsville', 'Coquille', 'Boardman', 'Harrisburg', 'Toledo', 'Myrtle Creek', 'North Plains', 'Hubbard', 'Mt. Angel', 'Jefferson', 'Bandon', 'Dundee', 'Oakridge', 'Nysssa', 'Shady Cove', 'Sisters', 'Jacksonville', 'Sublimity', 'Millersburg', 'Burns', 'Dayton', 'Gervais', 'La Pine', 'Myrtle Point']
+// list of 100 largest cities/towns in Oregon, from Wikipedia
+// TODO: finish this list to include ALL Oregon cities/towns
+const cities = ['Portland', 'Eugene', 'Salem', 'Gresham', 'Hillsboro', 'Bend', 'Beaverton', 'Medford', 'Springfield', 'Corvalis', 'Albany', 'Tigard', 'Lake Oswego', 'Keizer', 'Grants Pass', 'Oregon City', 'McMinnville', 'Redmond', 'Tualatin', 'West Linn', 'Wilsonville', 'Forest Grove', 'Woodburn', 'Newberg', 'Happy Valley', 'Roseburg', 'Klamath Falls', 'Ashland', 'Milwaukie', 'Sherwood', 'Hermiston', 'Central Point', 'Lebanon', 'Canby', 'Pendleton', 'Dallas', 'Troutdale', 'The Dalles', 'Coos Bay', 'St. Helens', 'La Grande', 'Cornelius', 'Sandy', 'Gladstone', 'Ontario', 'Monmouth', 'Prineville', 'Cottage Grove', 'Silverton', 'Fairview', 'North Bend', 'Newport', 'Mololla', 'Astoria', 'Baker City', 'Independence', 'Sweet Home', 'Lincoln City', 'Eagle Point', 'Florence', 'Sutherlin', 'Hood River', 'Stayton', 'Scappoose', 'Madras', 'Umatilla', 'Milton-Freewater', 'Seaside', 'Junction City', 'Brookings', 'Talent', 'Warrenton', 'Creswell', 'Winston', 'Philomath', 'Veneta', 'Tillamook', 'King City', 'Sheridan', 'Pheonix', 'Lafayette', 'Wood Village', 'Estacada', 'Reedsport', 'Aumsville', 'Coquille', 'Boardman', 'Harrisburg', 'Toledo', 'Myrtle Creek', 'North Plains', 'Hubbard', 'Mt. Angel', 'Jefferson', 'Bandon', 'Dundee', 'Oakridge', 'Nysssa', 'Shady Cove', 'Sisters', 'Jacksonville', 'Sublimity', 'Millersburg', 'Burns', 'Dayton', 'Gervais', 'La Pine', 'Myrtle Point']
 
 function MapPage({ listings, listingCategoryIcons }) {
   const [ searchParams, ] = useSearchParams()
@@ -39,17 +39,25 @@ function MapPage({ listings, listingCategoryIcons }) {
   // Do this in pre-processing or on the BE, so it's not being recalculated every time
   let cityCount = {}
   cities.forEach((e) => cityCount[e.toLowerCase()] = 0)
-  listings = listings.map((listing) => {
-    let listingCity
-    cities.forEach((city) => { 
-      if (listing.full_address?.includes(city)) {
-        listingCity = city.toLowerCase() 
+  listings.forEach((listing) => {
+    cities.forEach((city) => {
+      if (listing.city?.toLowerCase() === city.toLowerCase()) {
         cityCount[city.toLowerCase()] ++
       }
     })
-    listing.location = listingCity ?? ''
-    return listing
   })
+
+  // listings = listings.map((listing) => {
+  //   let listingCity
+  //   cities.forEach((city) => { 
+  //     if (listing.full_address?.includes(city)) {
+  //       listingCity = city.toLowerCase() 
+  //       cityCount[city.toLowerCase()] ++
+  //     }
+  //   })
+  //   listing.location = listingCity ?? ''
+  //   return listing
+  // })
 
   console.log('Eugene', cityCount['eugene'])
   console.log('Portland', cityCount['portland'])
@@ -64,25 +72,25 @@ function MapPage({ listings, listingCategoryIcons }) {
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-
-  // const locationOptions = [
-  //   { key: 1, text: `Portland (${cityCount['portland']})`, value: 'portland'},
-  //   { key: 2, text: `Eugene (${cityCount['eugene']})`, value: 'eugene'},
-  //   { key: 3, text: `Florence (${cityCount['florence']})`, value: 'florence'}
-  // ]
-
-  const locationOptions = cities.filter(city => cityCount[city?.toLowerCase()] !==0).map((city, i) => {
-    const lcCity = city.toLowerCase()
-    if (cityCount[lcCity] !== 0) {
-      console.log(city, cityCount[lcCity])
-      return { key: i, text: `${city} (${cityCount[lcCity]})`, value: lcCity }
+  const locationDropdownOptions = cities.filter(city => cityCount[city?.toLowerCase()] !==0).map((city, i) => {
+    if (cityCount[city] !== 0) {
+      console.log(city, cityCount[city])
+      return { key: i, text: `${city} (${cityCount[city]})`, value: city }
     }
   })
 
-  console.log(locationOptions)
+  // const locationDropdownOptions = cities.filter(city => cityCount[city?.toLowerCase()] !==0).map((city, i) => {
+  //   const lcCity = city.toLowerCase()
+  //   if (cityCount[lcCity] !== 0) {
+  //     console.log(city, cityCount[lcCity])
+  //     return { key: i, text: `${city} (${cityCount[lcCity]})`, value: lcCity }
+  //   }
+  // })
+
+  console.log(locationDropdownOptions)
 
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationOptions={locationOptions}/>
+    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationDropdownOptions={locationDropdownOptions}/>
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -90,7 +98,7 @@ function MapPage({ listings, listingCategoryIcons }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, search, setSearch, locationOptions }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, search, setSearch, locationDropdownOptions }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   return (<>
@@ -113,7 +121,7 @@ function MapNavigation({ listingCategories, listingCategoryIcons, search, setSea
           {/* location  */}
           <Grid.Column width={4}>
           <Dropdown placeholder='Location' fluid search selection 
-            options={locationOptions} 
+            options={locationDropdownOptions} 
             value={searchParams.get('location') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), location: value })}
           />
           </Grid.Column>
@@ -162,7 +170,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
   const [ searchParams, setSearchParams ] = useSearchParams()
   return (
     <Ref innerRef={ref}>
-      <Card as="article" color={getColor(index)} centered raised className="map-card">
+      <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
         <Card.Content>
           <div style={{ display: "flex", justifyContent: 'space-between'}}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
