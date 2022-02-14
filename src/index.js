@@ -9,6 +9,7 @@ import Map from './components/Map'
 import { getListings, getListingMetadata } from './data'
 import { formatListings } from './utils'
 import About from './components/About'
+import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
 function App({listings, listingMetadata}) {
@@ -17,6 +18,7 @@ function App({listings, listingMetadata}) {
       <Page>
         <Routes>
           <Route path="/about" element={<About />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
           <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
           <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
