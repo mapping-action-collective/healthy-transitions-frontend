@@ -6,20 +6,20 @@ import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
 
-import { getListings, getListingCategories } from './data'
+import { getListings, getListingMetadata } from './data'
 import { formatListings } from './utils'
 import About from './components/About'
 import SuggestUpdate from './components/SuggestUpdate'
 
-function App({listings, listingCategoryIcons}) {
+function App({listings, listingMetadata}) {
   return (
     <Router>
       <Page>
         <Routes>
           <Route path="/about" element={<About />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
-          <Route path="/" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
-          <Route path=":markerId" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
+          <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
+          <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
         </Routes>
       </Page>
     </Router>
@@ -37,6 +37,7 @@ const API_URL =
 Promise
   .all([
     getListings(API_URL),
-    getListingCategories(API_URL),
+    getListingMetadata(API_URL)
   ])
-  .then(([ listings, listingCategoryIcons ]) => ReactDOM.render(<App listings={formatListings(listings)} listingCategoryIcons={listingCategoryIcons} />, window.app))
+  .then(([ listings, listingMetadata ]) => ReactDOM.render(<App listings={formatListings(listings)} listingMetadata={listingMetadata} />, window.app))
+  

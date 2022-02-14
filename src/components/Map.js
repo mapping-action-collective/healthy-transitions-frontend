@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } f
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
-import { get, set } from 'lodash/fp'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
@@ -13,81 +12,23 @@ import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
-// list of 100 largest cities/towns in Oregon, from Wikipedia
-// TODO: finish this list to include ALL Oregon cities/towns
-const cities = ['Portland', 'Eugene', 'Salem', 'Gresham', 'Hillsboro', 'Bend', 'Beaverton', 'Medford', 'Springfield', 'Corvalis', 'Albany', 'Tigard', 'Lake Oswego', 'Keizer', 'Grants Pass', 'Oregon City', 'McMinnville', 'Redmond', 'Tualatin', 'West Linn', 'Wilsonville', 'Forest Grove', 'Woodburn', 'Newberg', 'Happy Valley', 'Roseburg', 'Klamath Falls', 'Ashland', 'Milwaukie', 'Sherwood', 'Hermiston', 'Central Point', 'Lebanon', 'Canby', 'Pendleton', 'Dallas', 'Troutdale', 'The Dalles', 'Coos Bay', 'St. Helens', 'La Grande', 'Cornelius', 'Sandy', 'Gladstone', 'Ontario', 'Monmouth', 'Prineville', 'Cottage Grove', 'Silverton', 'Fairview', 'North Bend', 'Newport', 'Mololla', 'Astoria', 'Baker City', 'Independence', 'Sweet Home', 'Lincoln City', 'Eagle Point', 'Florence', 'Sutherlin', 'Hood River', 'Stayton', 'Scappoose', 'Madras', 'Umatilla', 'Milton-Freewater', 'Seaside', 'Junction City', 'Brookings', 'Talent', 'Warrenton', 'Creswell', 'Winston', 'Philomath', 'Veneta', 'Tillamook', 'King City', 'Sheridan', 'Pheonix', 'Lafayette', 'Wood Village', 'Estacada', 'Reedsport', 'Aumsville', 'Coquille', 'Boardman', 'Harrisburg', 'Toledo', 'Myrtle Creek', 'North Plains', 'Hubbard', 'Mt. Angel', 'Jefferson', 'Bandon', 'Dundee', 'Oakridge', 'Nysssa', 'Shady Cove', 'Sisters', 'Jacksonville', 'Sublimity', 'Millersburg', 'Burns', 'Dayton', 'Gervais', 'La Pine', 'Myrtle Point']
-
-function MapPage({ listings, listingCategoryIcons }) {
+function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
 
-  const listingCategories = useMemo(() =>
-    listings.reduce((listingCategories, listing) => {
-      const [ parentCategory, subCategory ] = listing.category.split(`: `)
-      return set(`[${parentCategory}][${subCategory}]`)(1 + (get(`[${parentCategory}][${subCategory}]`)(listingCategories) ?? 0))(listingCategories)
-    }, {}), [listings])
-
-
-  // listings = listings.map((listing) => {
-  //   const city = listing.full_address?.includes('Eugene') ? 'eugene' : listing.full_address?.includes('Portland') ? 'portland' : listing.full_address?.includes('Florence') ? 'florence' : ''
-  //   listing.location = city
-  //   cityCount[city] ++
-  //   return listing
-  // })
-
-  // NOTE: this functionality will happen server-side. It's only here for testing purposes, to see if this works
-  // Do this in pre-processing or on the BE, so it's not being recalculated every time
-  let cityCount = {}
-  cities.forEach((e) => cityCount[e.toLowerCase()] = 0)
-  listings.forEach((listing) => {
-    cities.forEach((city) => {
-      if (listing.city?.toLowerCase() === city.toLowerCase()) {
-        cityCount[city.toLowerCase()] ++
-      }
-    })
-  })
-
-  // listings = listings.map((listing) => {
-  //   let listingCity
-  //   cities.forEach((city) => { 
-  //     if (listing.full_address?.includes(city)) {
-  //       listingCity = city.toLowerCase() 
-  //       cityCount[city.toLowerCase()] ++
-  //     }
-  //   })
-  //   listing.location = listingCity ?? ''
-  //   return listing
-  // })
-
-  console.log('Eugene', cityCount['eugene'])
-  console.log('Portland', cityCount['portland'])
-  console.log('Florence', cityCount['florence'])
-  console.log(listings)  
-  console.log('time 1 MAP', Date.now())
+  // Icon info is also now included in the route "/api/listing-meta"
+  // Note: The operations for calculating listingCategories and listingCities were moved to the BE
+  const { listingCategoryIcons, listingCategories, listingCities } = listingMetadata
 
   let filteredListings = filterListings(listings, searchParams, search)
-
-  console.log('time 2 MAP', Date.now())
 
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  const locationDropdownOptions = cities.filter(city => cityCount[city?.toLowerCase()] !==0).map((city, i) => {
-    if (cityCount[city] !== 0) {
-      console.log(city, cityCount[city])
-      return { key: i, text: `${city} (${cityCount[city]})`, value: city }
-    }
+  // This data comes from the API now
+  const locationDropdownOptions = Object.entries(listingCities).map(([cityName, count]) => {
+    return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
-
-  // const locationDropdownOptions = cities.filter(city => cityCount[city?.toLowerCase()] !==0).map((city, i) => {
-  //   const lcCity = city.toLowerCase()
-  //   if (cityCount[lcCity] !== 0) {
-  //     console.log(city, cityCount[lcCity])
-  //     return { key: i, text: `${city} (${cityCount[lcCity]})`, value: lcCity }
-  //   }
-  // })
-
-  console.log(locationDropdownOptions)
 
   return (<>
     <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationDropdownOptions={locationDropdownOptions}/>
@@ -116,13 +57,10 @@ function MapNavigation({ listingCategories, listingCategoryIcons, search, setSea
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
-          {/* Semantic UI's grid system is 16 wide  */}
           <Grid.Column as={Form.Input} width={4} type="number" placeholder="Age" value={searchParams.get('age') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), age: value })} />
           {/* location  */}
           <Grid.Column width={4}>
-          <Dropdown placeholder='Location' fluid search selection 
-            options={locationDropdownOptions} 
-            value={searchParams.get('location') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), location: value })}
+          <Dropdown placeholder='Location' fluid search selection options={locationDropdownOptions} value={searchParams.get('city') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), city: value })}
           />
           </Grid.Column>
           <Grid.Column as={Form.Input} width={8} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => setSearch(value)} />
@@ -181,7 +119,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           <Segment secondary>
             { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
-            { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a></Card.Description> }
+            { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
             {/* Note: text message instructions are almost always strings that include non-numeric information. They should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
@@ -195,9 +133,6 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           </Segment>
           <Segment basic vertical>
             <ExpandableDescription label="Description" value={description} />
-          </Segment>
-          <Segment basic vertical>
-            { video_description && <Card.Description>Video description: <a href={video_description}>{video_description}</a></Card.Description> }
           </Segment>
           <Segment secondary>
             { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Age:</Card.Header> {min_age}-{max_age}</Card.Description>
