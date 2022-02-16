@@ -1,4 +1,5 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
+import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
@@ -16,22 +17,24 @@ function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
 
-  // Icon info is also now included in the route "/api/listing-meta"
-  // Note: The operations for calculating listingCategories and listingCities were moved to the BE
   const { listingCategoryIcons, listingCategories, listingCities } = listingMetadata
 
-  let filteredListings = filterListings(listings, searchParams, search)
+  const debouncedSearch = debounce((value) => {
+    setSearch(value)
+  }, 300);
+
+  const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
 
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  // This data comes from the API now
+  // This data comes from the API 
   const locationDropdownOptions = Object.entries(listingCities).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
 
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationDropdownOptions={locationDropdownOptions}/>
+    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} debouncedSearch={debouncedSearch} locationDropdownOptions={locationDropdownOptions}/>
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -39,17 +42,42 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, search, setSearch, locationDropdownOptions }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, search, debouncedSearch, locationDropdownOptions }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  const [ age, setAge ] = useState(searchParams.get('age') || ``)
+
+  const debouncedAge = debounce((value) => {
+    setSearchParams({ ...Object.fromEntries(searchParams), age: value })
+  }, 300)
+
+  // Set the UI state fast for good UX, but debounce the actual search logic
+  const handleAge = value => {
+    // The "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
+    if (value >= 0 && value <100) {
+      setAge(value)
+      debouncedAge(value)
+    }
+  }
+
+  const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
+
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
       { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
-        <Dropdown as="li" key={parentCategory} className="column" icon={null} text={<><Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} /><header>{parentCategory}</header></>}>
+        <Dropdown as="li" className="column" icon={null} 
+          key={parentCategory} 
+          text={<>
+            <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
+            <header>{parentCategory}</header></>
+          }>
+
           <Dropdown.Menu as="menu">
-          { Object.entries(subCategories).map(([subCategory, count]) =>
-            <Dropdown.Item key={subCategory} as={NavLink} text={`${subCategory} (${count})`} to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
+          {Object.entries(subCategories).map(([subCategory, count]) =>
+            <Dropdown.Item key={subCategory} as={NavLink} 
+              text={`${subCategory} (${count})`} 
+              to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
           )}
           </Dropdown.Menu>
         </Dropdown>
@@ -57,13 +85,25 @@ function MapNavigation({ listingCategories, listingCategoryIcons, search, setSea
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
-          <Grid.Column as={Form.Input} width={4} type="number" placeholder="Age" value={searchParams.get('age') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), age: value })} />
-          {/* location  */}
+          {/* Age Input */}
+          <Grid.Column 
+            as={Form.Input} width={4} type="number" placeholder="Age" min='0' max='99'
+            value={age} 
+            onChange={(e, {value}) => handleAge(value)}  
+           />
+          {/* Location Dropdown  */}
           <Grid.Column width={4}>
-          <Dropdown placeholder='Location' fluid search selection options={locationDropdownOptions} value={searchParams.get('city') || ``} onChange={(e, {value}) => setSearchParams({ ...Object.fromEntries(searchParams), city: value })}
-          />
+            <Dropdown placeholder='Location' fluid search selection 
+              options={locationDropdownOptions} 
+              value={searchParams.get('city') || ``} 
+              onChange={(e, {value}) => handleCity(value)}
+            />
           </Grid.Column>
-          <Grid.Column as={Form.Input} width={8} tabIndex="1" placeholder="Search" action={{icon: "search"}} onFocus={() => navigate(`/?${searchParams.toString()}`)} onChange={(e, {value}) => setSearch(value)} />
+          <Grid.Column as={Form.Input} width={8} tabIndex="1" 
+            placeholder="Search" 
+            action={{icon: "search"}} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+            onChange={(e, {value}) => debouncedSearch(value)} />
         </Grid>
         <Label.Group as="menu" columns={[...searchParams].length} className="doubling container">
           { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="pink"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
@@ -84,6 +124,7 @@ function MapCards({ listings, cardRefs, mapRef }) {
   return (
     <Card.Group as="section" itemsPerRow="1">
       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)}
+      {/* {listings.filter((listing, index) => index < 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)} */}
     </Card.Group>
   )
 }
@@ -91,7 +132,7 @@ function MapCards({ listings, cardRefs, mapRef }) {
 const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
   const navigate = useNavigate()
   return (
-    <Dropdown icon='angle down' direction='left'>
+    <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
       <Dropdown.Menu>
         <Dropdown.Item text='Copy link'icon='share alternate'
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
@@ -106,6 +147,7 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
