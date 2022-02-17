@@ -1,7 +1,7 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown, Button } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import 'leaflet/dist/leaflet.css';
@@ -115,18 +115,46 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
   </>)
 }
 
-function MapCards({ listings, cardRefs, mapRef }) {
+// function MapCards({ listings, cardRefs, mapRef }) {
+//   const location = useLocation()
+//   const { markerId } = useParams()
+//   const currentCard = cardRefs[markerId]
+//   useEffect(() => {
+//     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
+//     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
+//   }, [currentCard, location, mapRef])
+//   return (
+//     <Card.Group as="section" itemsPerRow="1">
+//       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)}
+//       {/* {listings.filter((listing, index) => index < 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)} */}
+//     </Card.Group>
+//   )
+// }
+
+const showButtonStyle = {
+  width: '95%',
+  marginLeft: '2.5%',
+  marginTop: '15px',
+  marginBottom: '25px',
+}
+
+function MapCards({ listings, cardRefs, mapRef, savedCards, handleSave }) {
   const location = useLocation()
   const { markerId } = useParams()
+  const [showAll, setShowAll] = useState(false)
   const currentCard = cardRefs[markerId]
+
   useEffect(() => {
     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
   }, [currentCard, location, mapRef])
+
   return (
     <Card.Group as="section" itemsPerRow="1">
-      {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)}
-      {/* {listings.filter((listing, index) => index < 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)} */}
+      {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />) 
+      :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />)} 
+      {(listings.length > 55 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 55} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
+      : <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} />}
     </Card.Group>
   )
 }
