@@ -30,13 +30,8 @@ function MapPage({ listings, listingMetadata }) {
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  // This data comes from the API 
-  const locationDropdownOptions = Object.entries(listingCities).map(([cityName, count]) => {
-    return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
-  })
-
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} locationDropdownOptions={locationDropdownOptions}/>
+    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities}/>
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -44,7 +39,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, locationDropdownOptions }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
@@ -63,6 +58,11 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
   }
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
+
+  // This data comes from the API. It's optional, so null check it first. 
+  const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
+    return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
+  })
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
@@ -94,14 +94,15 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
             onChange={(e, {value}) => handleAge(value)}  
            />
           {/* Location Dropdown  */}
-          <Grid.Column width={4}>
+          {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
             <Dropdown placeholder='Location' fluid search selection 
               options={locationDropdownOptions} 
               value={searchParams.get('city') || ``} 
               onChange={(e, {value}) => handleCity(value)}
             />
-          </Grid.Column>
-          <Grid.Column as={Form.Input} width={8} tabIndex="1" 
+          </Grid.Column>}
+          {/* Search  */}
+          <Grid.Column as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
             placeholder="Search" 
             action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
@@ -162,7 +163,6 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  console.log(covid_message || '')
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
