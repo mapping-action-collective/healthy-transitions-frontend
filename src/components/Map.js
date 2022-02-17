@@ -13,6 +13,8 @@ import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
+// TODO: add a null check for the city info, don't show if it's not there.
+
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
@@ -34,7 +36,7 @@ function MapPage({ listings, listingMetadata }) {
   })
 
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} debouncedSearch={debouncedSearch} locationDropdownOptions={locationDropdownOptions}/>
+    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} locationDropdownOptions={locationDropdownOptions}/>
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -42,7 +44,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, search, debouncedSearch, locationDropdownOptions }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, locationDropdownOptions }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
