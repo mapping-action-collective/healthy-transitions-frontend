@@ -115,22 +115,6 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
   </>)
 }
 
-// function MapCards({ listings, cardRefs, mapRef }) {
-//   const location = useLocation()
-//   const { markerId } = useParams()
-//   const currentCard = cardRefs[markerId]
-//   useEffect(() => {
-//     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
-//     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
-//   }, [currentCard, location, mapRef])
-//   return (
-//     <Card.Group as="section" itemsPerRow="1">
-//       {listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)}
-//       {/* {listings.filter((listing, index) => index < 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} />)} */}
-//     </Card.Group>
-//   )
-// }
-
 const showButtonStyle = {
   width: '95%',
   marginLeft: '2.5%',
@@ -149,12 +133,13 @@ function MapCards({ listings, cardRefs, mapRef, savedCards, handleSave }) {
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
   }, [currentCard, location, mapRef])
 
+  // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
   return (
     <Card.Group as="section" itemsPerRow="1">
       {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />) 
       :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />)} 
       {(listings.length > 55 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 55} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
-      : <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} />}
+      : (listings.length > 55 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
     </Card.Group>
   )
 }
@@ -174,10 +159,10 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
   )
 }
 
-const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, ...listing}, index}, ref) => {
+const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-
+  console.log(covid_message || '')
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
@@ -203,23 +188,30 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
           </Segment>
+          {/* Description  */}
           <Segment basic vertical>
             <ExpandableDescription label="Description" value={description} />
           </Segment>
+          {covid_message && <Card.Description style={{marginBottom: '.5em'}}><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
+          <Card.Description as={NavLink} to={`/?category=${encodeURIComponent(category)}`}><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
+            </Card.Description>
           <Segment secondary>
             { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Age:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
             : null }
-            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility Requirements:</Card.Header> {eligibility_requirements}</Card.Description> }
-            { languages_offered && <ValueList name="Languages Offered" values={languages_offered} /> }
+            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description> }
+            { financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information}</Card.Description> }
+            {/* { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions}</Card.Description> } */}
+            { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
             { services_provided && <ValueList name="Services" values={services_provided} /> }
           </Segment>
           {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
+        {/* Show keywords if they exist. If not, show category so the cards have a consistent design */}
         <Card.Content extra>
-          <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>
-          { keywords && keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )}
+          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}>&nbsp; &nbsp;# {keyword}</NavLink> )
+          : <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>}
         </Card.Content>
       </Card>
     </Ref>
@@ -242,7 +234,7 @@ const MapMap = forwardRef(({ listings, cardRefs }, ref) => {
   return (
     <Ref innerRef={ref}>
       <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
-        <TileLayer attribution="" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+        <TileLayer attribution="Healthy Transitions" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <MapMarkers listings={listings} cardRefs={cardRefs} />
       </Segment>
     </Ref>
