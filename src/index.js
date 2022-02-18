@@ -6,20 +6,23 @@ import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
 
-import { getListings, getListingCategories } from './data'
+import { getListings, getListingMetadata, getStaticText } from './data'
 import { formatListings } from './utils'
 import About from './components/About'
+import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
-function App({listings, listingCategoryIcons}) {
+function App({listings, listingMetadata, staticText}) {
+  const { about_text: aboutText, resources, disclaimer } = staticText ?? {}
   return (
     <Router>
       <Page>
         <Routes>
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<About aboutText={aboutText} />} />
+          <Route path="/resources" element={<Resources resources={resources} />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
-          <Route path="/" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
-          <Route path=":markerId" element={<Map listings={listings} listingCategoryIcons={listingCategoryIcons} />} />
+          <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
+          <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
         </Routes>
       </Page>
     </Router>
@@ -37,6 +40,8 @@ const API_URL =
 Promise
   .all([
     getListings(API_URL),
-    getListingCategories(API_URL),
+    getListingMetadata(API_URL),
+    getStaticText(API_URL)
   ])
-  .then(([ listings, listingCategoryIcons ]) => ReactDOM.render(<App listings={formatListings(listings)} listingCategoryIcons={listingCategoryIcons} />, window.app))
+  .then(([ listings, listingMetadata, staticText ]) => ReactDOM.render(<App listings={formatListings(listings)} listingMetadata={listingMetadata} staticText={staticText} />, window.app))
+  
