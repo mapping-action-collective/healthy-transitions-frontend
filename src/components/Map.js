@@ -11,6 +11,7 @@ import 'react-leaflet-markercluster/dist/styles.min.css';
 import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
+import { getCityCount } from '../utils'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
@@ -18,13 +19,14 @@ function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
 
-  const { listingCategoryIcons, listingCategories, listingCities } = listingMetadata
+  const { listingCategoryIcons, listingCategories } = listingMetadata
 
   const debouncedSearch = debounce((value) => {
     setSearch(value)
   }, 300);
 
   const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
+  let listingCities = getCityCount(filteredListings)
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 

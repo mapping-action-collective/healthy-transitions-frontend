@@ -7,13 +7,16 @@ import Page from './components/Page'
 import Map from './components/Map'
 
 import { getListings, getListingMetadata, getStaticText } from './data'
-import { formatListings } from './utils'
+import { formatListings, getCategoryCount, getCityCount } from './utils'
 import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
 function App({listings, listingMetadata, staticText}) {
   const { about_text: aboutText, resources, disclaimer } = staticText ?? {}
+  listingMetadata.categoryCount = getCategoryCount(listings)
+  listingMetadata.cityCount = getCityCount(listings)
+
   return (
     <Router>
       <Page>
