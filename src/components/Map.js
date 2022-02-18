@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } f
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown, Button } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
+
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
@@ -12,8 +13,6 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
-
-// TODO: add a null check for the city info, don't show if it's not there.
 
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
@@ -26,7 +25,6 @@ function MapPage({ listings, listingMetadata }) {
   }, 300);
 
   const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
-
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
@@ -133,7 +131,7 @@ function MapCards({ listings, cardRefs, mapRef, savedCards, handleSave }) {
     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
   }, [currentCard, location, mapRef])
-
+  
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
   return (
     <Card.Group as="section" itemsPerRow="1">

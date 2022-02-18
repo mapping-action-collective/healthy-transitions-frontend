@@ -44,4 +44,3 @@ Promise
     getStaticText(API_URL)
   ])
   .then(([ listings, listingMetadata, staticText ]) => ReactDOM.render(<App listings={formatListings(listings)} listingMetadata={listingMetadata} staticText={staticText} />, window.app))
-  
