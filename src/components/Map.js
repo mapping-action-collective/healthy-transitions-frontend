@@ -4,6 +4,7 @@ import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } f
 import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown, Button } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
+import { useSessionStorage } from './../hooks/useSessionStorage'
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
@@ -165,6 +166,9 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  const [saved, setSaved] = useSessionStorage('saved', []);
+
+  console.log(saved)
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
