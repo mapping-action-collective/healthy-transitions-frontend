@@ -18,7 +18,7 @@ import { getCityCount, getCategoryCount } from './utils/cities'
 function App({listings, listingMetadata, staticText}) {
   const { about_text: aboutText, resources, disclaimer } = staticText ?? {}
   // White Bird Demo route
-  const whiteBirdListings = listings.filter(listing => listing.data_source?.includes('White Bird Little Help Book'))
+  const whiteBirdListings = listings.filter(listing => listing.data_source?.includes('White Bird Little Help Book')).filter(listing => !listing.category.includes('Education'))
   const whiteBirdListingCities = getCityCount(whiteBirdListings)
   const listingCategories = getCategoryCount(whiteBirdListings)
   
