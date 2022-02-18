@@ -12,7 +12,7 @@ function Page({children}) {
     <Segment as="header" basic vertical inverted>
       <Menu as="nav" size="massive" color="teal" secondary pointing className="container">
         <Menu.Item as={NavLink} to="/" end className="mac-logo">Mapping Action Collective</Menu.Item>
-        <Menu.Item as={NavLink} to="/" end>Oregon Youth Resource Map</Menu.Item>
+        <Menu.Item as={NavLink} to="/" end>White Bird Demo</Menu.Item>
         <Menu.Item as={NavLink} to="/resources" position="right"><header>Resources</header></Menu.Item>
         <Menu.Item as={NavLink} to="/about"><header>About</header></Menu.Item>
         <Menu.Item as={NavLink} to="/suggest"><header>Suggest Update</header></Menu.Item>
