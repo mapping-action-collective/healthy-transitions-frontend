@@ -16,7 +16,7 @@ function App({listings, listingMetadata, staticText}) {
   const { about_text: aboutText, resources, disclaimer } = staticText ?? {}
   return (
     <Router>
-      <Page>
+      <Page disclaimer={disclaimer}>
         <Routes>
           <Route path="/about" element={<About aboutText={aboutText} />} />
           <Route path="/resources" element={<Resources resources={resources} />} />

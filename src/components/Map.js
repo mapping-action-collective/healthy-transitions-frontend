@@ -18,6 +18,30 @@ const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink",
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
+  const [saved, setSaved] = useSessionStorage('saved', [])
+  const [hidden, setHidden] = useSessionStorage('hidden', [])
+  const [showSaved, setShowSaved] = useState(false)
+
+  const handleSave = (id, reset=false) => {
+    if (reset) {
+      setSaved([])
+      return
+    }
+    saved.includes(id) ? setSaved(saved.filter(e => e !== id)) : setSaved([...saved, id])
+  }
+
+  const handleHide = (id, reset=false) => {
+    if (reset) {
+      setHidden([])
+      return
+    }
+    setHidden([...hidden, id])
+  }
+  // useEffect(() => {
+  //   handleSave(null, true)
+  // },[])
+  console.log('saved', saved)
+  console.log('hidden', hidden)
 
   const { listingCategoryIcons, listingCategories, listingCities } = listingMetadata
 
@@ -25,20 +49,30 @@ function MapPage({ listings, listingMetadata }) {
     setSearch(value)
   }, 300);
 
-  const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
+  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
+
+  if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
 
   return (<>
     <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities}/>
     <Container as="main" id="map-page">
-      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
-      <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
+      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
+      <div className='leaflet-container-div'>
+        <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
+        <div>
+          <Button basic content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
+          {/* Resets saved listings  */}
+          <Button basic content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
+          <Button basic content='Show Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} />
+        </div>
+      </div>
     </Container>
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleSave }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
@@ -126,7 +160,7 @@ const showButtonStyle = {
   marginBottom: '25px',
 }
 
-function MapCards({ listings, cardRefs, mapRef, savedCards, handleSave }) {
+function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide }) {
   const location = useLocation()
   const { markerId } = useParams()
   const [showAll, setShowAll] = useState(false)
@@ -140,15 +174,15 @@ function MapCards({ listings, cardRefs, mapRef, savedCards, handleSave }) {
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
   return (
     <Card.Group as="section" itemsPerRow="1">
-      {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />) 
-      :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={savedCards?.includes(listing.guid)} handleSave={handleSave} />)} 
+      {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
+      :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
       {(listings.length > 55 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 55} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
       : (listings.length > 55 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
     </Card.Group>
   )
 }
 
-const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
+const CardCornerDropdown = ({ index, guid, full_address='', mapRef, handleHide }) => {
   const navigate = useNavigate()
   return (
     <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
@@ -157,26 +191,41 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef }) => {
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
         {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
-        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment'icon={{ name: 'chat', color: getColor(index)}} />
+        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
+        <Dropdown.Item onClick={() => handleHide(guid)}
+          text='Hide listing' icon={{ name: 'eye slash outline', color: getColor(index)}} />
       </Dropdown.Menu>
     </Dropdown>
   )
 }
 
-const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, index}, ref) => {
+// TODO: Move these and/or rewrite with proper CSS classes 
+const starStyle = { marginRight: '.65em' }
+const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
+const cardStyle = { maxWidth: '525px' }
+const tagStyle = { color: 'grey' }
+
+const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  const [saved, setSaved] = useSessionStorage('saved', []);
 
-  console.log(saved)
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
         <Card.Content>
-          <div style={{ display: "flex", justifyContent: 'space-between'}}>
+          {/* <div style={{ display: "flex", justifyContent: 'space-between'}}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
             {CardCornerDropdown({index, guid, full_address, mapRef})}
+            </div> */}
+        {/* Extra divs are necessary for flex box spacing  */}
+          <div style={labelDivStyle}>
+            <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+            <div> 
+              <Icon name={saved ? 'star' : 'star outline'} color={getColor(index)} style={starStyle} onClick={() => handleSave(guid)} />
+              {CardCornerDropdown({index, guid, full_address, mapRef, handleHide})}
             </div>
+          </div>
+          {/* Header  */}
           <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
           { full_address && <Card.Meta style={{ cursor: 'pointer' }} onClick={() => { navigate(`/${guid}`, { state: { scrollToMap: true } }) }} title="View on map"><Icon name="map marker alternate" /> {full_address}</Card.Meta> }
           <Segment secondary>
