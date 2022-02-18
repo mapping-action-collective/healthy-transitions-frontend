@@ -42,6 +42,10 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
 
+  // useEffect(() => {
+  //   setSearchParams(new URLSearchParams({...Object.fromEntries(searchParams), tag: 'Youth Services' }).toString())
+  // }, [])
+
   const debouncedAge = debounce((value) => {
     setSearchParams({ ...Object.fromEntries(searchParams), age: value })
   }, 300)
@@ -190,17 +194,18 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           <Segment basic vertical>
             <ExpandableDescription label="Description" value={description} />
           </Segment>
-          {covid_message && <Card.Description style={{marginBottom: '.5em'}}><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
-          <Card.Description as={NavLink} to={`/?category=${encodeURIComponent(category)}`}><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
-            </Card.Description>
-          <Segment secondary>
-            { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Age:</Card.Header> {min_age}-{max_age}</Card.Description>
+          {covid_message && <Card.Description><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
+          { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Ages:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
             : null }
-            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description> }
-            { financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information}</Card.Description> }
-            {/* { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions}</Card.Description> } */}
+          <Card.Description as={NavLink} to={`/?category=${encodeURIComponent(category)}`}><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
+            </Card.Description>
+          <Segment secondary>
+            {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
+            {/* {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements.includes(`\n`) ? eligibility_requirements.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : eligibility_requirements}</Card.Description>} */}
+            {/* {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>} */}
+            {intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
             { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
             { services_provided && <ValueList name="Services" values={services_provided} /> }
           </Segment>
@@ -231,7 +236,7 @@ const ValueList = ({ name, values }) => values && (
 const MapMap = forwardRef(({ listings, cardRefs }, ref) => {
   return (
     <Ref innerRef={ref}>
-      <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
+      <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={6.75} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
         <TileLayer attribution="Healthy Transitions" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <MapMarkers listings={listings} cardRefs={cardRefs} />
       </Segment>
