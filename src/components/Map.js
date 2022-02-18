@@ -42,6 +42,10 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
 
+  // useEffect(() => {
+  //   setSearchParams(new URLSearchParams({...Object.fromEntries(searchParams), tag: 'Youth Services' }).toString())
+  // }, [])
+
   const debouncedAge = debounce((value) => {
     setSearchParams({ ...Object.fromEntries(searchParams), age: value })
   }, 300)
@@ -231,7 +235,7 @@ const ValueList = ({ name, values }) => values && (
 const MapMap = forwardRef(({ listings, cardRefs }, ref) => {
   return (
     <Ref innerRef={ref}>
-      <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={8} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
+      <Segment as={MapContainer} center={[44.0489388,-123.0919415]} zoom={10} minZoom={6.75} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
         <TileLayer attribution="Healthy Transitions" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <MapMarkers listings={listings} cardRefs={cardRefs} />
       </Segment>

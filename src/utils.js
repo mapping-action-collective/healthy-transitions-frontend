@@ -26,6 +26,18 @@ function sortListings(listings, keyword1, keyword2) {
     })
   }
 
+  // Privilege listings in Eugene for now
+  // TODO: set this to the user's location if possible
+  sortedListings = sortedListings.sort((listing1, listing2) => {
+    if (listing1.full_address?.includes('Eugene') && !listing2.full_address?.includes('Eugene')) {
+      return -1
+    }
+    if (!listing1.full_address?.includes('Eugene') && listing2.full_address?.includes('Eugene')) {
+      return 1
+    }
+    return 0
+  })
+
   // ---- sort by keyword1 (1st priority)
   if (keyword1) {
     sortedListings = sortedListings.sort((listing1, listing2) => {
