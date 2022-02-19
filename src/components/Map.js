@@ -26,7 +26,7 @@ function MapPage({ listings, listingMetadata }) {
   }, 300);
 
   const filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
-  let listingCities = getCityCount(filteredListings)
+  let listingCities = getCityCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 

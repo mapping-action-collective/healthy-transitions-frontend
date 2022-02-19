@@ -13,7 +13,7 @@ import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
 function App({listings, listingMetadata, staticText}) {
-  const { about_text: aboutText, resources, disclaimer } = staticText ?? {}
+  const { about_text: aboutText, resources, disclaimer, contributors } = staticText ?? {}
   listingMetadata.categoryCount = getCategoryCount(listings)
   listingMetadata.cityCount = getCityCount(listings)
 
@@ -21,7 +21,7 @@ function App({listings, listingMetadata, staticText}) {
     <Router>
       <Page>
         <Routes>
-          <Route path="/about" element={<About aboutText={aboutText} />} />
+          <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />
           <Route path="/resources" element={<Resources resources={resources} />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
           <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
