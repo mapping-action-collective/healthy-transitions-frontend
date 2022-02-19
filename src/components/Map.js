@@ -15,7 +15,7 @@ import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor } from '../utils'
 
 function MapPage({ listings, listingMetadata }) {
-  const [ searchParams, ] = useSearchParams()
+  const [ searchParams, setSearchParams] = useSearchParams()
   const [ search, setSearch ] = useState()
 
   // Todo: Move save & hide logic to Filters component
@@ -58,7 +58,18 @@ function MapPage({ listings, listingMetadata }) {
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
+  // if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
+
+  // Todo: This is exceeding render limit. Use useEffect instead? 
+  // if (saved.length > 0 && showSaved) {
+  //   filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
+  //   let paramsString = '/showSaved'
+  //   saved?.forEach(function(id) {
+  //     paramsString = paramsString.concat(`&saved=${id}`)
+  //   })
+  //   console.log(paramsString)
+  //   setSearchParams(paramsString)
+  // }
 
   return (<>
     <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} setShowSaved={setShowSaved} />
@@ -185,9 +196,9 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   return (
     <Card.Group as="section" itemsPerRow="1">
       {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
-      :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
-      {(listings.length > 55 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 55} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
-      : (listings.length > 55 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
+      :listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
+      {(listings.length > 35 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
+      : (listings.length > 35 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
     </Card.Group>
   )
 }
@@ -218,6 +229,7 @@ const tagStyle = { color: 'grey' }
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  const formatSocialUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
 
   return (
     <Ref innerRef={ref}>
@@ -246,11 +258,11 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             {/* Note: text message instructions are almost always strings that include non-numeric information. They should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
             { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
-            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{blog_link}</a></Card.Description> }
-            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{twitter_link}</a></Card.Description> }
-            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{facebook_link}</a></Card.Description> }
-            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{youtube_link}</a></Card.Description> }
-            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
+            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialUrl(blog_link)}</a></Card.Description> }
+            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{formatSocialUrl(twitter_link)}</a></Card.Description> }
+            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{formatSocialUrl(facebook_link)}</a></Card.Description> }
+            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{formatSocialUrl(youtube_link)}</a></Card.Description> }
+            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialUrl(instagram_link)}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
           </Segment>
           {/* Description  */}
