@@ -102,7 +102,7 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
       { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
-        <Dropdown as="li" className="column" icon={null} 
+        <Dropdown as="li" className="column" icon={null}
           key={parentCategory} 
           text={<>
             <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
@@ -145,8 +145,8 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
-            <Button basic floated='right' inverted color='blue' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-            <Button basic floated='right' inverted color='blue' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
+            <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
+            <Button basic floated='right' inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
           </Label.Group>
           {/* <Label.Group align="right" style={{display: 'flex'}}>
             <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />

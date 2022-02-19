@@ -27,9 +27,9 @@ function AboutPage({aboutText, contributors}) {
           <Image src={DirectionServiceLogo} />
         </figure>
       </Segment>
-      <Segment as="article" vertical>
+      {contributors &&<Segment as="article" vertical>
         <Header as="h1">Contributors</Header>
-        {contributors && contributors.map((entry, index) => (
+        {contributors.map((entry, index) => (
           <Item style={whiteBirdStyle} key={entry.name}>
             <Item.Content>
               <Header as="a" color={getColor(index)} style={contributorStyle} href={entry.website_url ?? null} target="_blank">{entry.name}</Header>
@@ -37,7 +37,7 @@ function AboutPage({aboutText, contributors}) {
             </Item.Content>
           </Item>
         ))}
-      </Segment>
+      </Segment>}
     </Container>
   )
 }
