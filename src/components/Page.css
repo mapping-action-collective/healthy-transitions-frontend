@@ -5,6 +5,15 @@ html, body { overflow: hidden; }
 #app > header > nav.menu { font-family: 'Yanone Kaffeesatz', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
 #app > header > nav.menu > .item { padding: 2px 0.25em 0; font-size: larger; line-height: 2.5; color: white; }
 
+#app > footer { position: sticky; bottom: 0px; z-index: 2; padding: 0; 
+  background-color: #F3F4F5; 
+  border-radius: 0; color: 'dimgrey';
+}
+
+#app > footer > p { color: 'grey'; }
+
 #app > main { flex: 1 1 auto; }
 
 .mac-logo { text-transform: uppercase !important; white-space: pre; color: white !important; opacity: 0.75; }
+
+/* Semantic Grey: F3F4F5 */

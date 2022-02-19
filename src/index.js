@@ -19,7 +19,7 @@ function App({listings, listingMetadata, staticText}) {
 
   return (
     <Router>
-      <Page>
+      <Page disclaimer={disclaimer}>
         <Routes>
           <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />
           <Route path="/resources" element={<Resources resources={resources} />} />

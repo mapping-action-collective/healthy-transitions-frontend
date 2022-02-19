@@ -5,9 +5,9 @@ import { Menu, Segment } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 import './Page.css'
 
-function Page({children}) {
-  let location = useLocation();
-  useEffect(() => window.gtag('event', 'page_view', { 'page_location': window.location, 'page_path': location.pathname + location.hash }) || console.log(location), [location])
+function Page({disclaimer, children}) {
+  // let location = useLocation();
+  // useEffect(() => window.gtag('event', 'page_view', { 'page_location': window.location, 'page_path': location.pathname + location.hash }) || console.log(location), [location])
   return (<>
     <Segment as="header" basic vertical inverted>
       <Menu as="nav" size="massive" color="teal" secondary pointing className="container">
@@ -19,6 +19,9 @@ function Page({children}) {
       </Menu>
     </Segment>
     {children}
+    <Segment as="footer" basic vertical>
+      {/* <p>{disclaimer}</p> */}
+    </Segment>
   </>)
 }
 
