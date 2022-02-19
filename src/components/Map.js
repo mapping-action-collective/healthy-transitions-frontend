@@ -12,15 +12,16 @@ import 'react-leaflet-markercluster/dist/styles.min.css';
 import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
-import { getCityCount } from '../utils'
-
-const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
+import { getCityCount, getColor } from '../utils'
 
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
+
+  // Todo: Move save & hide logic to Filters component
   const [saved, setSaved] = useSessionStorage('saved', [])
   const [hidden, setHidden] = useSessionStorage('hidden', [])
+  // TODO: showSaved needs to clear all other state (search and navParams) when true
   const [showSaved, setShowSaved] = useState(false)
 
   const handleSave = (id, reset=false) => {
@@ -36,6 +37,8 @@ function MapPage({ listings, listingMetadata }) {
       setHidden([])
       return
     }
+    // Remove from saved if it's saved. UX gets wonky otherwise.
+    saved.includes(id) && setSaved(saved.filter(e => e !== id))
     setHidden([...hidden, id])
   }
   // useEffect(() => {
