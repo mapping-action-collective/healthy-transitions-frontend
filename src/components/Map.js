@@ -53,12 +53,24 @@ function MapPage({ listings, listingMetadata }) {
     setSearch(value)
   }, 300);
 
-  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
+  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden, saved, showSaved), [listings, searchParams, search, hidden, saved, showSaved])
   let listingCities = getCityCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
   // if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
+
+  // useEffect(() => {
+  //   if (saved.length > 0 && showSaved) {
+  //     // filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
+  //     let paramsString = '/'
+  //     saved?.forEach(function(id) {
+  //       paramsString = paramsString.concat(`&saved=${id}`)
+  //     })
+  //     console.log(paramsString)
+  //     setSearchParams(encodeURIComponent(paramsString))
+  //   }
+  // }, [showSaved])
 
   // Todo: This is exceeding render limit. Use useEffect instead? 
   // if (saved.length > 0 && showSaved) {
@@ -80,7 +92,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleSave, hidden, handleHide, setShowSaved }) {
+function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleSave, hidden, handleHide, showSaved, setShowSaved }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
@@ -132,20 +144,20 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
+        {/* Location Dropdown  */}
+        {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
+          <Dropdown placeholder='Location' fluid search selection 
+            options={locationDropdownOptions} 
+            value={searchParams.get('city') || ``} 
+            onChange={(e, {value}) => handleCity(value)}
+          />
+          </Grid.Column>}
           {/* Age Input */}
           <Grid.Column 
             as={Form.Input} width={4} type="number" placeholder="Age"
             value={age} 
             onChange={(e, {value}) => handleAge(value)}  
            />
-          {/* Location Dropdown  */}
-          {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
-            <Dropdown placeholder='Location' fluid search selection 
-              options={locationDropdownOptions} 
-              value={searchParams.get('city') || ``} 
-              onChange={(e, {value}) => handleCity(value)}
-            />
-          </Grid.Column>}
           {/* Search  */}
           <Grid.Column as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
             placeholder="Search" 
@@ -157,7 +169,7 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
           <Label.Group columns={[...searchParams].length} className="doubling container">
             { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-            <Button basic floated='right' inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
+            <Button basic floated='right' inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(!showSaved)} />
           </Label.Group>
           {/* <Label.Group align="right" style={{display: 'flex'}}>
             <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
@@ -274,7 +286,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
             : null }
-          <Card.Description as={NavLink} to={`/?category=${encodeURIComponent(category)}`}><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
+          <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
             </Card.Description>
           <Segment secondary>
             {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
