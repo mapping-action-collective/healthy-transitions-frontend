@@ -190,7 +190,7 @@ const CardCornerDropdown = ({ index, guid, full_address='', mapRef, handleHide }
         <Dropdown.Item text='Copy link'icon='share alternate'
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
-        {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>}
+        {/* {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>} */}
         <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
         <Dropdown.Item onClick={() => handleHide(guid)}
           text='Hide listing' icon={{ name: 'eye slash outline', color: getColor(index)}} />
