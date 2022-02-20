@@ -167,7 +167,7 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   return (
     <Card.Group as="section" itemsPerRow="1">
       {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
-      :listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
+      : listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
       {(listings.length > 35 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
       : (listings.length > 35 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
     </Card.Group>
@@ -202,12 +202,8 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
 
   return (
     <Ref innerRef={ref}>
-      <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
+      <Card as="article" color={getColor(index)} centered raised className="map-card" style={cardStyle}>
         <Card.Content>
-          {/* <div style={{ display: "flex", justifyContent: 'space-between'}}>
-            <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
-            {CardCornerDropdown({index, guid, full_address, mapRef})}
-            </div> */}
         {/* Extra divs are necessary for flex box spacing  */}
           <div style={labelDivStyle}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
@@ -224,7 +220,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
-            {/* Note: Text message instructions is a string and should not be hyperlinked */}
+            {/* Text message is a string and should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
             { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
             { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialMediaUrl(blog_link)}</a></Card.Description> }
@@ -255,9 +251,9 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           </Segment>
           {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
-        {/* Show keywords if they exist. If not, show category so the cards have a consistent design */}
+        {/* Show keywords if they exist. If not, show category so cards have consistent design */}
         <Card.Content extra>
-          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}> # {keyword}</NavLink> )
+          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })} style={tagStyle}> # {keyword}</NavLink> )
           : <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>}
         </Card.Content>
       </Card>
