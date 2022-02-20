@@ -99,13 +99,14 @@ export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
-
 // this function accepts listings, and filters according to a search string
 // the Object.entries bit just means we're joining all the text fields before searching on them
 // update 12.28.21 - added optional tag argument. it runs a text search, using the same logic as "search" 
-export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
-  const { age, tag, ...filters } = Object.fromEntries(searchParams)
-  sortListings(listings, 'Youth Services', 'BIPOC Services')
+export function filterListings(listings = {}, searchParams, search = "", hidden=[], saved=[], showSaved) {
+  const { age, tag, ...filters } = Object.fromEntries(searchParams) 
+  // Show saved only
+  if (saved.length > 0 && showSaved) return listings.filter(listing => saved.includes(listing.guid))
+  // sortListings(listings, 'Youth Services', 'BIPOC Services')
   let filteredListings = listings.filter(listing => !hidden.includes(listing.guid))
 
   // tag is optional. it should perform a text search

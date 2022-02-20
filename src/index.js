@@ -1,36 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import {HashRouter as Router, Route, Routes} from 'react-router-dom'
-
-import './index.css'
-import Page from './components/Page'
-import Map from './components/Map'
+import App from './App'
 
 import { getListings, getListingMetadata, getStaticText } from './data'
-import { formatListings, getCategoryCount, getCityCount } from './utils'
-import About from './components/About'
-import Resources from './components/Resources'
-import SuggestUpdate from './components/SuggestUpdate'
-
-function App({listings, listingMetadata, staticText}) {
-  const { about_text: aboutText, resources, disclaimer, contributors } = staticText ?? {}
-  listingMetadata.categoryCount = getCategoryCount(listings)
-  listingMetadata.cityCount = getCityCount(listings)
-
-  return (
-    <Router>
-      <Page disclaimer={disclaimer}>
-        <Routes>
-          <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />
-          <Route path="/resources" element={<Resources resources={resources} />} />
-          <Route path="/suggest" element={<SuggestUpdate />} />
-          <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
-          <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
-        </Routes>
-      </Page>
-    </Router>
-  )
-}
+import { formatListings } from './utils'
 
 const CURRENT_URL = new URL(window.location)
 const API_URL =

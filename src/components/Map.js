@@ -15,37 +15,26 @@ import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor } from '../utils'
 
 function MapPage({ listings, listingMetadata }) {
-  const [ searchParams, ] = useSearchParams()
+  const [ searchParams, setSearchParams] = useSearchParams()
   const [ search, setSearch ] = useState()
 
-  // Todo: Move save & hide logic to Filters component
+  /* Logic for saved & hidden listings */
   const [saved, setSaved] = useSessionStorage('saved', [])
   const [hidden, setHidden] = useSessionStorage('hidden', [])
-  // TODO: showSaved needs to clear all other state (search and navParams) when true
+  // TODO: showSaved needs to clear all other state (search and navParams) when true. It then needs to set nav params to indicate the saved ids
   const [showSaved, setShowSaved] = useState(false)
 
   const handleSave = (id, reset=false) => {
-    if (reset) {
-      setSaved([])
-      return
-    }
+    if (reset) { setSaved([]); return; }
     saved.includes(id) ? setSaved(saved.filter(e => e !== id)) : setSaved([...saved, id])
   }
 
   const handleHide = (id, reset=false) => {
-    if (reset) {
-      setHidden([])
-      return
-    }
+    if (reset) { setHidden([]); return; }
     // Remove from saved if it's saved. UX gets wonky otherwise.
     saved.includes(id) && setSaved(saved.filter(e => e !== id))
     setHidden([...hidden, id])
   }
-  // useEffect(() => {
-  //   handleSave(null, true)
-  // },[])
-  console.log('saved', saved)
-  console.log('hidden', hidden)
 
   const { listingCategoryIcons, listingCategories } = listingMetadata
 
@@ -53,15 +42,13 @@ function MapPage({ listings, listingMetadata }) {
     setSearch(value)
   }, 300);
 
-  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
+  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden, saved, showSaved), [listings, searchParams, search, hidden, saved, showSaved])
   let listingCities = getCityCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
-
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} setShowSaved={setShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} setShowSaved={setShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -69,7 +56,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleSave, hidden, handleHide, setShowSaved }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, hidden, handleHide, showSaved, setShowSaved }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
@@ -82,18 +69,14 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
     setSearchParams({ ...Object.fromEntries(searchParams), age: value })
   }, 300)
 
-  // Set the UI state fast for good UX, but debounce the actual search logic
+  // Set the UI state fast for good UX, but debounce the actual search logic. Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
   const handleAge = value => {
-    // The "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
-    if (value >= 0 && value <100) {
-      setAge(value)
-      debouncedAge(value)
-    }
+    if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }
   }
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
 
-  // This data comes from the API. It's optional, so null check it first. 
+  // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
@@ -121,20 +104,20 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
+        {/* Location Dropdown  */}
+        {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
+          <Dropdown placeholder='Location' fluid search selection 
+            options={locationDropdownOptions} 
+            value={searchParams.get('city') || ``} 
+            onChange={(e, {value}) => handleCity(value)}
+          />
+          </Grid.Column>}
           {/* Age Input */}
           <Grid.Column 
             as={Form.Input} width={4} type="number" placeholder="Age"
             value={age} 
             onChange={(e, {value}) => handleAge(value)}  
            />
-          {/* Location Dropdown  */}
-          {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
-            <Dropdown placeholder='Location' fluid search selection 
-              options={locationDropdownOptions} 
-              value={searchParams.get('city') || ``} 
-              onChange={(e, {value}) => handleCity(value)}
-            />
-          </Grid.Column>}
           {/* Search  */}
           <Grid.Column as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
             placeholder="Search" 
@@ -145,19 +128,18 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
-            <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-            <Button basic floated='right' inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
+            {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
+            <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' 
+              content='Clear Hidden' 
+              disabled={hidden.length === 0} 
+              onClick={() => handleHide(null, true)} />
+            <Button basic floated='right' inverted color='teal' size='mini' icon='star outline' 
+              // content='Show Saved' 
+              content={showSaved ? 'Hide Saved' : 'Show Saved'}
+              disabled={saved.length === 0} 
+              onClick={() => setShowSaved(!showSaved)} />
           </Label.Group>
-          {/* <Label.Group align="right" style={{display: 'flex'}}>
-            <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
-            <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-          </Label.Group>   */}
         </div>
-        {/* <Label.Group align="right"> */}
-          {/* <Button basic inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
-          <Button basic inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
-          {/* <Button basic inverted color='teal' size='mini' content='Show Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
-        {/* </Label.Group> */}
       </Form>
     </Segment>
   </>)
@@ -185,22 +167,20 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   return (
     <Card.Group as="section" itemsPerRow="1">
       {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
-      :listings.filter((listing, index) => index <= 55).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
-      {(listings.length > 55 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 55} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
-      : (listings.length > 55 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
+      : listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
+      {(listings.length > 35 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
+      : (listings.length > 35 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
     </Card.Group>
   )
 }
 
-const CardCornerDropdown = ({ index, guid, full_address='', mapRef, handleHide }) => {
-  const navigate = useNavigate()
+const CardCornerDropdown = ({ index, guid, handleHide }) => {
   return (
     <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
       <Dropdown.Menu>
         <Dropdown.Item text='Copy link'icon='share alternate'
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
-        {/* {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>} */}
         <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
         <Dropdown.Item onClick={() => handleHide(guid)}
           text='Hide listing' icon={{ name: 'eye slash outline', color: getColor(index)}} />
@@ -218,15 +198,12 @@ const tagStyle = { color: 'grey' }
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
 
   return (
     <Ref innerRef={ref}>
-      <Card as="article" color={getColor(index)} centered raised className="map-card" style={{ maxWidth: '525px' }}>
+      <Card as="article" color={getColor(index)} centered raised className="map-card" style={cardStyle}>
         <Card.Content>
-          {/* <div style={{ display: "flex", justifyContent: 'space-between'}}>
-            <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
-            {CardCornerDropdown({index, guid, full_address, mapRef})}
-            </div> */}
         {/* Extra divs are necessary for flex box spacing  */}
           <div style={labelDivStyle}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
@@ -243,14 +220,14 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
-            {/* Note: text message instructions are almost always strings that include non-numeric information. They should not be hyperlinked */}
+            {/* Text message is a string and should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
             { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
-            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{blog_link}</a></Card.Description> }
-            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{twitter_link}</a></Card.Description> }
-            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{facebook_link}</a></Card.Description> }
-            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{youtube_link}</a></Card.Description> }
-            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{instagram_link}</a></Card.Description> }
+            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialMediaUrl(blog_link)}</a></Card.Description> }
+            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{formatSocialMediaUrl(twitter_link)}</a></Card.Description> }
+            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{formatSocialMediaUrl(facebook_link)}</a></Card.Description> }
+            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{formatSocialMediaUrl(youtube_link)}</a></Card.Description> }
+            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialMediaUrl(instagram_link)}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
           </Segment>
           {/* Description  */}
@@ -262,7 +239,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
             : null }
-          <Card.Description as={NavLink} to={`/?category=${encodeURIComponent(category)}`}><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
+          <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
             </Card.Description>
           <Segment secondary>
             {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
@@ -274,9 +251,9 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           </Segment>
           {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
-        {/* Show keywords if they exist. If not, show category so the cards have a consistent design */}
+        {/* Show keywords if they exist. If not, show category so cards have consistent design */}
         <Card.Content extra>
-          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })}> # {keyword}</NavLink> )
+          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })} style={tagStyle}> # {keyword}</NavLink> )
           : <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>}
         </Card.Content>
       </Card>

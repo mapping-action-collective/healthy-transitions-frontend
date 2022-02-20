@@ -88,7 +88,7 @@ function MapPage({ listings, listingMetadata }) {
   })
 
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationDropdownOptions={locationDropdownOptions}/>
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} search={search} setSearch={setSearch} locationDropdownOptions={locationDropdownOptions}/>
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} savedCards={savedCards} handleSave={handleSave} />
       <div className='leaflet-container-div'>
@@ -99,7 +99,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, search, setSearch, locationDropdownOptions }) {
+function MapSearch({ listingCategories, listingCategoryIcons, search, setSearch, locationDropdownOptions }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   return (<>
