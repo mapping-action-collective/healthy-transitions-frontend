@@ -18,34 +18,23 @@ function MapPage({ listings, listingMetadata }) {
   const [ searchParams, setSearchParams] = useSearchParams()
   const [ search, setSearch ] = useState()
 
-  // Todo: Move save & hide logic to Filters component
+  /* Logic for saved & hidden listings */
   const [saved, setSaved] = useSessionStorage('saved', [])
   const [hidden, setHidden] = useSessionStorage('hidden', [])
-  // TODO: showSaved needs to clear all other state (search and navParams) when true
+  // TODO: showSaved needs to clear all other state (search and navParams) when true. It then needs to set nav params to indicate the saved ids
   const [showSaved, setShowSaved] = useState(false)
 
   const handleSave = (id, reset=false) => {
-    if (reset) {
-      setSaved([])
-      return
-    }
+    if (reset) { setSaved([]); return; }
     saved.includes(id) ? setSaved(saved.filter(e => e !== id)) : setSaved([...saved, id])
   }
 
   const handleHide = (id, reset=false) => {
-    if (reset) {
-      setHidden([])
-      return
-    }
+    if (reset) { setHidden([]); return; }
     // Remove from saved if it's saved. UX gets wonky otherwise.
     saved.includes(id) && setSaved(saved.filter(e => e !== id))
     setHidden([...hidden, id])
   }
-  // useEffect(() => {
-  //   handleSave(null, true)
-  // },[])
-  console.log('saved', saved)
-  console.log('hidden', hidden)
 
   const { listingCategoryIcons, listingCategories } = listingMetadata
 
@@ -58,33 +47,8 @@ function MapPage({ listings, listingMetadata }) {
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
-  // if (saved.length > 0 && showSaved) filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
-
-  // useEffect(() => {
-  //   if (saved.length > 0 && showSaved) {
-  //     // filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
-  //     let paramsString = '/'
-  //     saved?.forEach(function(id) {
-  //       paramsString = paramsString.concat(`&saved=${id}`)
-  //     })
-  //     console.log(paramsString)
-  //     setSearchParams(encodeURIComponent(paramsString))
-  //   }
-  // }, [showSaved])
-
-  // Todo: This is exceeding render limit. Use useEffect instead? 
-  // if (saved.length > 0 && showSaved) {
-  //   filteredListings = filteredListings.filter(listing => saved.includes(listing.guid))
-  //   let paramsString = '/showSaved'
-  //   saved?.forEach(function(id) {
-  //     paramsString = paramsString.concat(`&saved=${id}`)
-  //   })
-  //   console.log(paramsString)
-  //   setSearchParams(paramsString)
-  // }
-
   return (<>
-    <MapNavigation listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} setShowSaved={setShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} setShowSaved={setShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -92,7 +56,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleSave, hidden, handleHide, showSaved, setShowSaved }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, hidden, handleHide, showSaved, setShowSaved }) {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
@@ -105,18 +69,14 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
     setSearchParams({ ...Object.fromEntries(searchParams), age: value })
   }, 300)
 
-  // Set the UI state fast for good UX, but debounce the actual search logic
+  // Set the UI state fast for good UX, but debounce the actual search logic. Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
   const handleAge = value => {
-    // The "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
-    if (value >= 0 && value <100) {
-      setAge(value)
-      debouncedAge(value)
-    }
+    if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }
   }
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
 
-  // This data comes from the API. It's optional, so null check it first. 
+  // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
@@ -168,19 +128,18 @@ function MapNavigation({ listingCategories, listingCategoryIcons, debouncedSearc
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
-            <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-            <Button basic floated='right' inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(!showSaved)} />
+            {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
+            <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' 
+              content='Clear Hidden' 
+              disabled={hidden.length === 0} 
+              onClick={() => handleHide(null, true)} />
+            <Button basic floated='right' inverted color='teal' size='mini' icon='star outline' 
+              // content='Show Saved' 
+              content={showSaved ? 'Hide Saved' : 'Show Saved'}
+              disabled={saved.length === 0} 
+              onClick={() => setShowSaved(!showSaved)} />
           </Label.Group>
-          {/* <Label.Group align="right" style={{display: 'flex'}}>
-            <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
-            <Button basic style={{width: '115px'}} inverted color='blue' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} />
-          </Label.Group>   */}
         </div>
-        {/* <Label.Group align="right"> */}
-          {/* <Button basic inverted color='teal' size='mini' content='Show Saved' disabled={saved.length === 0} icon='star outline' onClick={() => setShowSaved(true)} />
-          <Button basic inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
-          {/* <Button basic inverted color='teal' size='mini' content='Show Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
-        {/* </Label.Group> */}
       </Form>
     </Segment>
   </>)
@@ -215,15 +174,13 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   )
 }
 
-const CardCornerDropdown = ({ index, guid, full_address='', mapRef, handleHide }) => {
-  const navigate = useNavigate()
+const CardCornerDropdown = ({ index, guid, handleHide }) => {
   return (
     <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
       <Dropdown.Menu>
         <Dropdown.Item text='Copy link'icon='share alternate'
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
-        {/* {full_address && <Dropdown.Item style={{ cursor: 'pointer' }} onClick={() => navigate(`/${guid}`, { state: { scrollToMap: true } }) } text='View on map' icon={{ name: 'map outline', color: getColor(index)}}/>} */}
         <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
         <Dropdown.Item onClick={() => handleHide(guid)}
           text='Hide listing' icon={{ name: 'eye slash outline', color: getColor(index)}} />
@@ -241,7 +198,7 @@ const tagStyle = { color: 'grey' }
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  const formatSocialUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
+  const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
 
   return (
     <Ref innerRef={ref}>
@@ -267,14 +224,14 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
-            {/* Note: text message instructions are almost always strings that include non-numeric information. They should not be hyperlinked */}
+            {/* Note: Text message instructions is a string and should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
             { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
-            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialUrl(blog_link)}</a></Card.Description> }
-            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{formatSocialUrl(twitter_link)}</a></Card.Description> }
-            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{formatSocialUrl(facebook_link)}</a></Card.Description> }
-            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{formatSocialUrl(youtube_link)}</a></Card.Description> }
-            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialUrl(instagram_link)}</a></Card.Description> }
+            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialMediaUrl(blog_link)}</a></Card.Description> }
+            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{formatSocialMediaUrl(twitter_link)}</a></Card.Description> }
+            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{formatSocialMediaUrl(facebook_link)}</a></Card.Description> }
+            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{formatSocialMediaUrl(youtube_link)}</a></Card.Description> }
+            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialMediaUrl(instagram_link)}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
           </Segment>
           {/* Description  */}

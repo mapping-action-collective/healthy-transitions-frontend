@@ -2,76 +2,6 @@
 // TODO: finish this list to include ALL Oregon cities/towns
 const cities = ['Portland', 'Eugene', 'Salem', 'Gresham', 'Hillsboro', 'Bend', 'Beaverton', 'Medford', 'Springfield', 'Corvallis', 'Albany', 'Tigard', 'Lake Oswego', 'Keizer', 'Grants Pass', 'Oregon City', 'McMinnville', 'Redmond', 'Tualatin', 'West Linn', 'Wilsonville', 'Forest Grove', 'Woodburn', 'Newberg', 'Happy Valley', 'Roseburg', 'Klamath Falls', 'Ashland', 'Milwaukie', 'Sherwood', 'Hermiston', 'Central Point', 'Lebanon', 'Canby', 'Pendleton', 'Dallas', 'Troutdale', 'The Dalles', 'Coos Bay', 'St. Helens', 'La Grande', 'Cornelius', 'Sandy', 'Gladstone', 'Ontario', 'Monmouth', 'Prineville', 'Cottage Grove', 'Silverton', 'Fairview', 'North Bend', 'Newport', 'Mololla', 'Astoria', 'Baker City', 'Independence', 'Sweet Home', 'Lincoln City', 'Eagle Point', 'Florence', 'Sutherlin', 'Hood River', 'Stayton', 'Scappoose', 'Madras', 'Umatilla', 'Milton-Freewater', 'Seaside', 'Junction City', 'Brookings', 'Talent', 'Warrenton', 'Creswell', 'Winston', 'Philomath', 'Veneta', 'Tillamook', 'King City', 'Sheridan', 'Pheonix', 'Lafayette', 'Wood Village', 'Estacada', 'Reedsport', 'Aumsville', 'Coquille', 'Boardman', 'Harrisburg', 'Toledo', 'Myrtle Creek', 'North Plains', 'Hubbard', 'Mt. Angel', 'Jefferson', 'Bandon', 'Dundee', 'Oakridge', 'Nysssa', 'Shady Cove', 'Sisters', 'Jacksonville', 'Sublimity', 'Millersburg', 'Burns', 'Dayton', 'Gervais', 'La Pine', 'Myrtle Point']
 
-export const listingCategoryIcons = {
-  "Basic Needs": {
-    "icon": "utensils"
-  },
-  "Care & Safety": {
-    "icon": "heart"
-  },
-  "Community Specific": {
-    "icon": "users"
-  },
-  "Community Resources": {
-    "icon": "users"
-  },
-  "Day Services & Drop-in": {
-    "icon": "sun"
-  },
-  "Education": {
-    "icon": "graduation cap"
-  },
-  "Financial": {
-    "icon": "money bill alternate outline"
-  },
-  "Food": {
-    "icon": "utensils"
-  },
-  "Health & Wellness": {
-    "icon": "stethoscope"
-  },
-  "Housing & Shelter": {
-    "icon": "home"
-  },
-  "Leadership Opportunities": {
-    "icon": "flag"
-  },
-  "Legal": {
-    "icon": "balance scale"
-  },
-  "More": {
-    "icon": "info circle"
-  },
-  "Mental Health": {
-    "icon": "heartbeat"
-  },
-  "Money": {
-    "icon": "money bill alternate outline"
-  },
-  "Other": {
-     "icon": "info circle"
-  },
-  "Social Services": {
-    "icon": "heart"
-  },
-  "Specialized Assistance": {
-    "icon": "handshake"
-  },
-  "Transit": {
-   "icon": "bus"
-  },
-  "Work": {
-    "icon": "briefcase"
-  },
-  "Work & Employment": {
-    "icon": "briefcase"
-  },
-  "Youth Leadership": {
-    "icon": "flag"
-  }
-}
-
-
 export const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
 export const getCityCount = listings => {
@@ -169,11 +99,10 @@ export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
-
 // this function accepts listings, and filters according to a search string
 // the Object.entries bit just means we're joining all the text fields before searching on them
 // update 12.28.21 - added optional tag argument. it runs a text search, using the same logic as "search" 
-export function filterListings(listings = {}, searchParams, search = "", hidden=[], saved=[], showSaved=false) {
+export function filterListings(listings = {}, searchParams, search = "", hidden=[], saved=[], showSaved) {
   const { age, tag, ...filters } = Object.fromEntries(searchParams) 
   // Show saved only
   if (saved.length > 0 && showSaved) return listings.filter(listing => saved.includes(listing.guid))

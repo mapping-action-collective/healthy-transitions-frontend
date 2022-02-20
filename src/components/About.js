@@ -28,7 +28,7 @@ function AboutPage({aboutText, contributors}) {
         </figure>
       </Segment>
       {contributors &&<Segment as="article" vertical>
-        <Header as="h1">Contributors</Header>
+        <Header as="h1">About Our Contributors</Header>
         {contributors.map((entry, index) => (
           <Item style={whiteBirdStyle} key={entry.name}>
             <Item.Content>
