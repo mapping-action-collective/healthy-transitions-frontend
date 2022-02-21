@@ -5,18 +5,20 @@ import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
 
-import usePosition from './hooks/useDistance'
-import { getCategoryCount, getCityCount } from './utils'
+import usePosition from './hooks/usePosition'
+import { getCategoryCount } from './utils'
+import { addDistanceToListings } from './geoUtils'
+
 
 import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
 function App({listings, listingMetadata, staticText}) {
-
   const { about_text: aboutText, resources, disclaimer, contributors } = staticText ?? {}
-  // Note: This hook returns the user's current coords. Todo: Set up functionality to display listings close to user (see RCR for sample code)
+  // Note: This hook returns the user's current coords. TODO: Potentially fetch this every minute, to keep up-to-date for mobile users
   const { coords, error } = usePosition()
+  if (coords) { listings = addDistanceToListings(listings, coords) }
   listingMetadata.categoryCount = getCategoryCount(listings)
 
   return (
@@ -26,8 +28,8 @@ function App({listings, listingMetadata, staticText}) {
           <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />
           <Route path="/resources" element={<Resources resources={resources} />} />
           <Route path="/suggest" element={<SuggestUpdate />} />
-          <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
-          <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
+          <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} userCoords={coords ?? null} />} />
+          <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} userCoords={coords ?? null} />} />
         </Routes>
       </Page>
     </Router>

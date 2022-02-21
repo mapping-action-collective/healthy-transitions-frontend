@@ -14,14 +14,14 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor } from '../utils'
 
-function MapPage({ listings, listingMetadata }) {
-  const [ searchParams, setSearchParams] = useSearchParams()
+function MapPage({ listings, listingMetadata, userCoords }) {
+  const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
 
   /* Logic for saved & hidden listings */
   const [saved, setSaved] = useSessionStorage('saved', [])
   const [hidden, setHidden] = useSessionStorage('hidden', [])
-  // TODO: showSaved needs to clear all other state (search and navParams) when true. It then needs to set nav params to indicate the saved ids
+  // TODO: showSaved needs to clear all other state (search and navParams) when true. TODO: set nav params to indicate the saved ids, possibly with a "/bookmark" sub route. This state slice may not be necessary once searchParams are in place.
   const [showSaved, setShowSaved] = useState(false)
 
   const handleSave = (id, reset=false) => {
@@ -38,11 +38,10 @@ function MapPage({ listings, listingMetadata }) {
 
   const { listingCategoryIcons, listingCategories } = listingMetadata
 
-  const debouncedSearch = debounce((value) => {
-    setSearch(value)
-  }, 300);
+  const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
   let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden, saved, showSaved), [listings, searchParams, search, hidden, saved, showSaved])
+  
   let listingCities = getCityCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
@@ -242,10 +241,10 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
             </Card.Description>
           <Segment secondary>
-            {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
+            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
             {/* {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements.includes(`\n`) ? eligibility_requirements.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : eligibility_requirements}</Card.Description>} */}
             {/* {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>} */}
-            {intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
+            { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
             { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
             { services_provided && <ValueList name="Services" values={services_provided} /> }
           </Segment>
