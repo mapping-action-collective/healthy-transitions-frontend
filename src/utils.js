@@ -29,6 +29,8 @@ export const getCategoryCount = (listings) => {
   return listingCategories
 }
 
+export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
+
 // this function accepts json listings and returns them, formatted for leaflet use
 export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
@@ -37,10 +39,10 @@ export function formatListings(listings) {
 // this function accepts listings, and filters according to a search string
 // the Object.entries bit just means we're joining all the text fields before searching on them
 // update 12.28.21 - added optional tag argument. it runs a text search, using the same logic as "search" 
-export function filterListings(listings = {}, searchParams, search = "", hidden=[], saved=[], showSaved) {
-  const { age, tag, ...filters } = Object.fromEntries(searchParams) 
+export function filterListings(listings = {}, searchParams, search = "", hidden=[], savedGuids=[], showSaved) {
+  const { age, tag, saved, ...filters } = Object.fromEntries(searchParams) 
   // Show saved only
-  if (saved.length > 0 && showSaved) return listings.filter(listing => saved.includes(listing.guid))
+  if (savedGuids.length > 0 && showSaved) return listings.filter(listing => savedGuids.includes(listing.guid))
   // sortListings(listings, 'Youth Services', 'BIPOC Services')
   let filteredListings = listings.filter(listing => !hidden.includes(listing.guid))
 

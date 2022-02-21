@@ -12,11 +12,18 @@ import 'react-leaflet-markercluster/dist/styles.min.css';
 import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
-import { getCityCount, getColor } from '../utils'
+import { getCityCount, getColor, formatSocialMediaUrl } from '../utils'
 
-function MapPage({ listings, listingMetadata, userCoords }) {
-  const [ searchParams, ] = useSearchParams()
+// const navigateToFavorites = () =>
+//   navigate({
+//     pathname: '/posts',
+//     search: `?${createSearchParams(params)}`,
+//   })
+
+function MapPage({ listings, listingMetadata }) {
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const [ search, setSearch ] = useState()
+  const navigate = useNavigate()
 
   /* Logic for saved & hidden listings */
   const [saved, setSaved] = useSessionStorage('saved', [])
@@ -36,6 +43,17 @@ function MapPage({ listings, listingMetadata, userCoords }) {
     setHidden([...hidden, id])
   }
 
+  // "saved" is an array of saved card guids
+  const handleShowSaved = () => {
+    // set state so that the UI components can update
+    setShowSaved(!showSaved)
+    const paramsString = saved.join("&saved=")
+    navigate({
+      pathname: '/',
+      search: `?saved=${paramsString}`,
+    })
+  }
+
   const { listingCategoryIcons, listingCategories } = listingMetadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
@@ -47,7 +65,7 @@ function MapPage({ listings, listingMetadata, userCoords }) {
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} setShowSaved={setShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} setShowSaved={setShowSaved} handleShowSaved={handleShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -55,10 +73,13 @@ function MapPage({ listings, listingMetadata, userCoords }) {
   </>)
 }
 
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, hidden, handleHide, showSaved, setShowSaved }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, hidden, handleHide, showSaved, setShowSaved, handleShowSaved }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
+
+  console.log(location) // pathname, search (search is searchparams), hash, state, key
 
   // useEffect(() => {
   //   setSearchParams(new URLSearchParams({...Object.fromEntries(searchParams), tag: 'Youth Services' }).toString())
@@ -126,7 +147,8 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
         </Grid>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
-            { [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
+            {!location.search.includes('saved') &&
+            [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
             <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' 
               content='Clear Hidden' 
@@ -136,7 +158,9 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
               // content='Show Saved' 
               content={showSaved ? 'Hide Saved' : 'Show Saved'}
               disabled={saved.length === 0} 
-              onClick={() => setShowSaved(!showSaved)} />
+              // onClick={() => setShowSaved(!showSaved)}
+              onClick={() => handleShowSaved(saved)}
+              />
           </Label.Group>
         </div>
       </Form>
@@ -177,7 +201,7 @@ const CardCornerDropdown = ({ index, guid, handleHide }) => {
   return (
     <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
       <Dropdown.Menu>
-        <Dropdown.Item text='Copy link'icon='share alternate'
+        <Dropdown.Item text='Copy link'icon='share alternate' id={`share=${guid}`}
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
         <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
@@ -197,7 +221,12 @@ const tagStyle = { color: 'grey' }
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
+
+  const updateSearchParams = (key, val) => {
+    const currentParams = Object.fromEntries([...searchParams])
+    const newParams = { ...currentParams, key: val }
+    setSearchParams(newParams)
+  }
 
   return (
     <Ref innerRef={ref}>
@@ -252,7 +281,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
         </Card.Content>
         {/* Show keywords if they exist. If not, show category so cards have consistent design */}
         <Card.Content extra>
-          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), tag: keyword })} style={tagStyle}> # {keyword}</NavLink> )
+          { keywords ? keywords.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> )
           : <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>}
         </Card.Content>
       </Card>
