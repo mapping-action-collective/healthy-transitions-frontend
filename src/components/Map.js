@@ -20,7 +20,7 @@ function MapPage({ listings, listingMetadata }) {
   const navigate = useNavigate()
   // Saved listings write to session storage and persist. Hidden listings reset on page refresh.
   const [saved, setSaved] = useSessionStorage('saved', [])
-  const [hidden, setHidden] = useState([])
+  const [hidden, setHidden] = useSessionStorage('hidden', [])
   const [showSaved, setShowSaved] = useState(false)
 
   const handleSave = (id, reset=false) => {
@@ -139,7 +139,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             {!location.search.includes('saved') &&
             [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
-            {/* <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Clear Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
+            <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Reset Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} />
             <Button basic floated='right' inverted color='teal' size='tiny' 
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
               content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
