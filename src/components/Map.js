@@ -74,21 +74,24 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
 
-  const debouncedAge = debounce((value) => {
-    setSearchParams({ ...Object.fromEntries(searchParams), age: value })
-  }, 300)
+  // When user clears the params, this clears the input value as well
+  useEffect(() => {
+    setAge(searchParams.get('age') ?? '')
+  },[searchParams])
 
-  // Set the UI state quickly, but debounce the actual search logic. Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
-  const handleAge = value => {
-    if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }
-  }
+  const debouncedAge = debounce((value) => { setSearchParams({ ...Object.fromEntries(searchParams), age: value })}, 500)
+
+  // Set the UI state quickly for better UX, but debounce the actual search logic.
+  // Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
+  const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
-
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
+
+  const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
@@ -137,7 +140,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             {!location.search.includes('saved') &&
-            [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
+            [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{titleCaseKey(key.replace(/_/ig,` `))}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
             {/* <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Clear Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
             <Button basic floated='right' inverted color='teal' size='tiny' 
@@ -174,6 +177,7 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
   return (
     <Card.Group as="section" itemsPerRow="1">
+      {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
       {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
       : listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
       {(listings.length > 35 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
