@@ -18,6 +18,7 @@ function App({listings, listingMetadata, staticText}) {
   const { about_text: aboutText, resources, disclaimer, contributors } = staticText ?? {}
   // Note: This hook returns the user's current coords. TODO: Potentially fetch this every minute, to keep up-to-date for mobile users
   const { coords, error } = usePosition()
+  // TODO: Refactor this to be async. See RCR "App.js" and "/utils" for sample code on doing this with promises 
   if (coords) { listings = addDistanceToListings(listings, coords) }
   listingMetadata.categoryCount = getCategoryCount(listings)
 

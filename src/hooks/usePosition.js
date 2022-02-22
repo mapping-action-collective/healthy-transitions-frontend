@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export default () => {
+const usePosition = () => {
   const [coords, setCoords] = useState({})
   const [error, setError] = useState(null)
   // The navigator.geolocation browser method takes three arguments: an onSuccess function, an onError function, and settings
@@ -18,3 +18,5 @@ export default () => {
 
   return { coords, error }
 }
+
+export default usePosition;
