@@ -14,12 +14,6 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor, formatSocialMediaUrl } from '../utils'
 
-// const navigateToFavorites = () =>
-//   navigate({
-//     pathname: '/posts',
-//     search: `?${createSearchParams(params)}`,
-//   })
-
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
@@ -27,15 +21,7 @@ function MapPage({ listings, listingMetadata }) {
   // Saved listings write to session storage and persist. Hidden listings reset on page refresh.
   const [saved, setSaved] = useSessionStorage('saved', [])
   const [hidden, setHidden] = useState([])
-  // const [hidden, setHidden] = useSessionStorage('hidden', [])
-  // TODO: showSaved needs to clear all other state (search and navParams) when true. TODO: set nav params to indicate the saved ids, possibly with a "/bookmark" sub route. This state slice may not be necessary once searchParams are in place.
   const [showSaved, setShowSaved] = useState(false)
-  console.log('saved', saved)
-  console.log('hidden', hidden)
-
-  // if (searchParams.get('saved')) {
-    
-  // }
 
   const handleSave = (id, reset=false) => {
     if (reset) { setSaved([]); return; }
@@ -88,15 +74,11 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
 
-  // useEffect(() => {
-  //   setSearchParams(new URLSearchParams({...Object.fromEntries(searchParams), tag: 'Youth Services' }).toString())
-  // }, [])
-
   const debouncedAge = debounce((value) => {
     setSearchParams({ ...Object.fromEntries(searchParams), age: value })
   }, 300)
 
-  // Set the UI state fast for good UX, but debounce the actual search logic. Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
+  // Set the UI state quickly, but debounce the actual search logic. Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
   const handleAge = value => {
     if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }
   }
