@@ -21,15 +21,21 @@ import { getCityCount, getColor, formatSocialMediaUrl } from '../utils'
 //   })
 
 function MapPage({ listings, listingMetadata }) {
-  const [ searchParams, setSearchParams ] = useSearchParams()
+  const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
   const navigate = useNavigate()
-
-  /* Logic for saved & hidden listings */
+  // Saved listings write to session storage and persist. Hidden listings reset on page refresh.
   const [saved, setSaved] = useSessionStorage('saved', [])
-  const [hidden, setHidden] = useSessionStorage('hidden', [])
+  const [hidden, setHidden] = useState([])
+  // const [hidden, setHidden] = useSessionStorage('hidden', [])
   // TODO: showSaved needs to clear all other state (search and navParams) when true. TODO: set nav params to indicate the saved ids, possibly with a "/bookmark" sub route. This state slice may not be necessary once searchParams are in place.
   const [showSaved, setShowSaved] = useState(false)
+  console.log('saved', saved)
+  console.log('hidden', hidden)
+
+  // if (searchParams.get('saved')) {
+    
+  // }
 
   const handleSave = (id, reset=false) => {
     if (reset) { setSaved([]); return; }
@@ -45,27 +51,30 @@ function MapPage({ listings, listingMetadata }) {
 
   // "saved" is an array of saved card guids
   const handleShowSaved = () => {
-    // set state so that the UI components can update
-    setShowSaved(!showSaved)
-    const paramsString = saved.join("&saved=")
-    navigate({
-      pathname: '/',
-      search: `?saved=${paramsString}`,
-    })
+    // If saved is already showing, clear the url bar
+    if (showSaved || searchParams.get('saved')) {
+      setShowSaved(!showSaved)
+      navigate({ pathname: '/', search: ''})
+    } else if (saved.length > 0) {
+      // set state so that the UI components can update
+      setShowSaved(!showSaved)
+      const paramsString = saved.join("&saved=")
+      navigate({ pathname: '/', search: `?saved=${paramsString}` })
+    } 
   }
 
   const { listingCategoryIcons, listingCategories } = listingMetadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
-  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden, saved, showSaved), [listings, searchParams, search, hidden, saved, showSaved])
+  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
   
   let listingCities = getCityCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} setShowSaved={setShowSaved} handleShowSaved={handleShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -73,13 +82,11 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, hidden, handleHide, showSaved, setShowSaved, handleShowSaved }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
-
-  console.log(location) // pathname, search (search is searchparams), hash, state, key
 
   // useEffect(() => {
   //   setSearchParams(new URLSearchParams({...Object.fromEntries(searchParams), tag: 'Youth Services' }).toString())
@@ -150,15 +157,11 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             {!location.search.includes('saved') &&
             [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{key.replace(/_/ig,` `)}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
-            <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' 
-              content='Clear Hidden' 
-              disabled={hidden.length === 0} 
-              onClick={() => handleHide(null, true)} />
-            <Button basic floated='right' inverted color='teal' size='mini' icon='star outline' 
-              // content='Show Saved' 
-              content={showSaved ? 'Hide Saved' : 'Show Saved'}
-              disabled={saved.length === 0} 
-              // onClick={() => setShowSaved(!showSaved)}
+            {/* <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Clear Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
+            <Button basic floated='right' inverted color='teal' size='tiny' 
+              icon={searchParams.get('saved') ? 'list' : 'star outline'}
+              content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
+              disabled={saved.length === 0 && !searchParams.get('saved')} 
               onClick={() => handleShowSaved(saved)}
               />
           </Label.Group>
