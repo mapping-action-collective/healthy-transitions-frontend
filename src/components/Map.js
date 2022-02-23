@@ -12,7 +12,7 @@ import 'react-leaflet-markercluster/dist/styles.min.css';
 import { filterListings } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
-import { getCityCount, getColor, formatSocialMediaUrl } from '../utils'
+import { getCityCount, getColor, formatSocialMediaUrl, titleCaseKey } from '../utils'
 
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
@@ -90,8 +90,6 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
-
-  const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
@@ -236,7 +234,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
             { phone_2 && <Card.Description><Icon name="phone" />{ phone_label_2 && `${phone_label_2}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_2}`}>{phone_2}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
-            { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
+            { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label ?? 'Crisis Line'}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
             {/* Text message is a string and should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
             { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
