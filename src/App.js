@@ -24,10 +24,10 @@ function App({listings, listingMetadata, staticText}) {
 
   return (
     <Router>
-      <Page disclaimer={disclaimer}>
+      <Page disclaimer={disclaimer} aboutText={aboutText} resources={resources}>
         <Routes>
-          <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />
-          <Route path="/resources" element={<Resources resources={resources} />} />
+          {aboutText && <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />}
+          {resources && <Route path="/resources" element={<Resources resources={resources} />} />}
           <Route path="/suggest" element={<SuggestUpdate />} />
           <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} userCoords={coords ?? null} />} />
           <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} userCoords={coords ?? null} />} />

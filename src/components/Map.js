@@ -114,22 +114,21 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
       </Grid>
       <Form size="tiny" className="container">
         <Grid>
+        <Grid.Column 
+            as={Form.Input} width={4} type="number" placeholder="Age"
+            value={age} 
+            onChange={(e, {value}) => handleAge(value)}  
+           />
         {/* Location Dropdown  */}
         {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
-          <Dropdown placeholder='Location' fluid search selection 
+          <Dropdown placeholder='Location' fluid search selection
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
             onChange={(e, {value}) => handleCity(value)}
           />
           </Grid.Column>}
-          {/* Age Input */}
           <Grid.Column 
-            as={Form.Input} width={4} type="number" placeholder="Age"
-            value={age} 
-            onChange={(e, {value}) => handleAge(value)}  
-           />
-          {/* Search  */}
-          <Grid.Column as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
+            as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
             placeholder="Search" 
             action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
