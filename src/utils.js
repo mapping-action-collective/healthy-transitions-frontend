@@ -31,6 +31,8 @@ export const getCategoryCount = (listings) => {
 
 export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
 
+export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
+
 // this function accepts json listings and returns them, formatted for leaflet use
 export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
