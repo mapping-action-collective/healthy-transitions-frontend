@@ -37,3 +37,6 @@ export function addDistanceToListings(listings, userCoords) {
   })
 	return sortByDistance(listings)
 }
+
+// const oregonBounds = { "min_long": -124.566244,	"min_lat": 41.991794,	"max_long": -116.463504,	"max_lat": 46.292035 }
+// export const isInOregon = (lat, long) => ((lat >= oregon.min_lat && lat <= oregon.max_lat) && (long >= oregon.min_long && long <= oregon.max_long))
