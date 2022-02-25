@@ -121,7 +121,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
            />
         {/* Location Dropdown  */}
         {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
-          <Dropdown placeholder='Location' fluid search selection
+          <Dropdown placeholder='Location' fluid search selection 
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
             onChange={(e, {value}) => handleCity(value)}
@@ -202,11 +202,14 @@ const CardCornerDropdown = ({ index, guid, handleHide }) => {
 const starStyle = { marginRight: '.65em' }
 const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
 const cardStyle = { maxWidth: '525px' }
-const tagStyle = { color: 'grey' }
+const tagStyle = { color: 'dimgrey' }
+const showMoreStyle = { marginTop: 0, padding: '.45em', textAlign: 'center', fontSize: '.95em', color: 'grey'}
+const detailsStyle = { marginTop: 0, padding: '.75em' }
 
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
+  const [showMore, setShowMore] = useState(false)
 
   const updateSearchParams = (key, val) => {
     const currentParams = Object.fromEntries([...searchParams])
@@ -229,6 +232,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           {/* Header  */}
           <Card.Header><Link to={`/${guid}`}>{full_name}</Link></Card.Header>
           { full_address && <Card.Meta style={{ cursor: 'pointer' }} onClick={() => { navigate(`/${guid}`, { state: { scrollToMap: true } }) }} title="View on map"><Icon name="map marker alternate" /> {full_address}</Card.Meta> }
+          {/* Address & Contact Info  */}
           <Segment secondary>
             { full_address && <Card.Description><Icon name="map marker alternate" /><a target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir//${encodeURIComponent(full_address)}`}>Get Directions <sup><Icon size="small" name="external" /></sup></a></Card.Description> }
             { phone_1 && <Card.Description><Icon name="phone" />{ phone_label_1 && `${phone_label_1}: ` }<a target="_blank" rel="noreferrer" href={`tel:${phone_1}`}>{phone_1}</a> { phone_1_ext && phone_1_ext}</Card.Description> }
@@ -249,20 +253,27 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             <ExpandableDescription label="Description" value={description} />
           </Segment>
           {covid_message && <Card.Description><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
+          {/* Show More div  */}
+          {(eligibility_requirements || financial_information || intake_instructions || languages_offered || services_provided) && showMore ?  
+            <Segment secondary style={detailsStyle} onClick={() => setShowMore(!showMore)}>
+              { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
+              {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
+              { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
+              { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
+              { services_provided && <ValueList name="Services" values={services_provided} /> }
+            </Segment>
+          : (eligibility_requirements || financial_information || intake_instructions || languages_offered || services_provided) ? 
+            <Segment style={showMoreStyle} onClick={() => setShowMore(!showMore)}>
+              <Icon name='angle down' color='grey' /> 
+                Show More
+            </Segment>
+          : null}
           { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Ages:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
             : null }
-          <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header> <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
+          <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header>    <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
             </Card.Description>
-          <Segment secondary>
-            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
-            {/* {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements.includes(`\n`) ? eligibility_requirements.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : eligibility_requirements}</Card.Description>} */}
-            {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
-            { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
-            { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
-            {/* { services_provided && <ValueList name="Services" values={services_provided} /> } */}
-          </Segment>
           {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
         {/* Show keywords if they exist. If not, show category so cards have consistent design */}
