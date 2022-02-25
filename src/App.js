@@ -21,7 +21,7 @@ function App({listings, listingMetadata, staticText}) {
   // TODO: Refactor this to be async. See RCR "App.js" and "/utils" for sample code on doing this with promises 
   if (coords) { listings = addDistanceToListings(listings, coords) }
   listingMetadata.categoryCount = getCategoryCount(listings)
-
+  
   return (
     <Router>
       <Page disclaimer={disclaimer} aboutText={aboutText} resources={resources}>

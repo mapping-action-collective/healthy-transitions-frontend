@@ -258,10 +258,10 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
           <Segment secondary>
             { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
             {/* {eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements.includes(`\n`) ? eligibility_requirements.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : eligibility_requirements}</Card.Description>} */}
-            {/* {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>} */}
+            {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
             { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
             { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
-            { services_provided && <ValueList name="Services" values={services_provided} /> }
+            {/* { services_provided && <ValueList name="Services" values={services_provided} /> } */}
           </Segment>
           {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
