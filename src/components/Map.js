@@ -301,7 +301,7 @@ const ValueList = ({ name, values }) => values && (
 const MapMap = forwardRef(({ listings, cardRefs }, ref) => {
   return (
     <Ref innerRef={ref}>
-      <Segment as={MapContainer} center={[44.0521,-123.0868]} zoom={10} minZoom={6.55} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
+      <Segment as={MapContainer} center={[44.0521,-123.0868]} zoom={7} minZoom={6.55} maxZoom={18} scrollWheelZoom={false} tap={true} dragging={true} touchZoom={true}>
         <TileLayer attribution="Healthy Transitions" url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
         <MapMarkers listings={listings} cardRefs={cardRefs} />
       </Segment>
@@ -316,7 +316,7 @@ function MapMarkers ({listings, cardRefs}) {
   const currentCoords = useMemo(() => listings.find(({ guid }) => guid === Number(markerId))?.coords, [listings, markerId])
   const bounds = useMemo(() => mappedListings.map(({coords}) => coords), [mappedListings])
   useEffect(() => bounds.length && map.fitBounds(bounds), [map, bounds])
-  useEffect(() => currentCoords && currentCoords[0] && currentCoords[1] && map.setView(currentCoords, 27), [map, currentCoords])
+  useEffect(() => currentCoords && currentCoords[0] && currentCoords[1] && map.setView(currentCoords, 18), [map, currentCoords])
 
   return (<>
     <MarkerClusterGroup>
