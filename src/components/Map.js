@@ -176,12 +176,17 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   const FirstThirtyListings = () => {
     if (markerId) {
       // Note: Leave this as a double equals to work around type coercion
-      const currentListing = listings.find(listing => listing.guid == markerId) 
-      return [currentListing, ...listings.slice(0, 35)].map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
-    } 
+      const a = listings.slice(0, 35)
+      if (a.find(listing => listing.guid == markerId)) {
+        return a.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+      } 
+      else {
+        const currentListing = listings.find(listing => listing.guid == markerId) 
+        return a.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
+      } 
+    }
     return listings.slice(0, 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
   }
-
   
   return (
     <Card.Group as="section" itemsPerRow="1">
@@ -267,8 +272,8 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
 
           <Segment secondary style={detailsStyle}>
             { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
-            {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
-            { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
+            {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p key={index}>{paragraph}</p>) : financial_information}</Card.Description>}
+            { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p key={index}>{paragraph}</p>) : intake_instructions}</Card.Description>}
             { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
             { services_provided && <ValueList name="Services" values={services_provided} /> }
           </Segment>
