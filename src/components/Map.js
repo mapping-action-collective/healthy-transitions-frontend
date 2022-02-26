@@ -170,15 +170,19 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
   }, [currentCard, location, mapRef])
-  
+
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
+  const AllListings = () => listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+  const FirstThirtyListings = () => listings.slice(0, 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+  
   return (
     <Card.Group as="section" itemsPerRow="1">
+      {/* No results found  */}
       {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
-      {showAll ? listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
-      : listings.filter((listing, index) => index <= 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)} 
-      {(listings.length > 35 && showAll === false) ? <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} /> 
-      : (listings.length > 35 && showAll) ? <Button fluid basic color='grey' icon='angle double up' content={`Show less`} onClick={() => setShowAll(false)} style={showButtonStyle} /> : null}
+      {/* Show first 30 listings by default if filteredListings is longer than that  */}
+      {showAll ? <AllListings /> : <FirstThirtyListings />}
+      {/* "Show More Listings" button  */}
+      {(listings.length > 30 && showAll === false) && <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} />}
     </Card.Group>
   )
 }
@@ -209,7 +213,6 @@ const detailsStyle = { marginTop: 0, padding: '.75em' }
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  const [showMore, setShowMore] = useState(false)
 
   const updateSearchParams = (key, val) => {
     const currentParams = Object.fromEntries([...searchParams])
@@ -253,21 +256,14 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             <ExpandableDescription label="Description" value={description} />
           </Segment>
           {covid_message && <Card.Description><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
-          {/* Show More div  */}
-          {(eligibility_requirements || financial_information || intake_instructions || languages_offered || services_provided) && showMore ?  
-            <Segment secondary style={detailsStyle} onClick={() => setShowMore(!showMore)}>
-              { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
-              {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
-              { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
-              { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
-              { services_provided && <ValueList name="Services" values={services_provided} /> }
-            </Segment>
-          : (eligibility_requirements || financial_information || intake_instructions || languages_offered || services_provided) ? 
-            <Segment style={showMoreStyle} onClick={() => setShowMore(!showMore)}>
-              <Icon name='angle down' color='grey' /> 
-                Show More
-            </Segment>
-          : null}
+
+          <Segment secondary style={detailsStyle}>
+            { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
+            {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : financial_information}</Card.Description>}
+            { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p>{paragraph}</p>) : intake_instructions}</Card.Description>}
+            { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
+            { services_provided && <ValueList name="Services" values={services_provided} /> }
+          </Segment>
           { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Ages:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
             : (!min_age && max_age) ? <Card.Description><Card.Header as="strong">Maximum age served:</Card.Header> {max_age}</Card.Description>
