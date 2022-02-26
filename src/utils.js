@@ -54,17 +54,32 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
   }
 
   const { age, tag, ...filters } = Object.fromEntries(searchParams) 
- 
-  let filteredListings = listings.filter(listing => !hidden.includes(listing.guid))
 
-  // tag is optional. it should perform a text search
-  if (tag) filteredListings = filteredListings.filter(listing => Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase()))
-  // Search term
-  filteredListings = filteredListings.filter(listing => Object.entries(listing).join(" ").toLowerCase().match(search.toLowerCase()))
+  const searchFunction = (listing) => {
+    const isHidden = (hidden.includes(listing.guid)) 
+    if (isHidden) return false
 
-  filteredListings = filteredListings.filter(listing => Object.entries(filters).every(([ key, value ]) => Array.isArray(listing[key]) ? listing[key].includes(value) : listing[key] === value))
+    if (tag) {
+      let hasTag = tag && Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())
+      if (!hasTag) return false
+    }
 
-  filteredListings = filteredListings.filter(({ min_age, max_age }) => !age || ((!max_age || age <= max_age) && (!min_age || age >= min_age)))
+    if (search) {
+      let hasSearchTerm = Object.entries(listing).join(" ").toLowerCase().match(search.toLowerCase())
+      if (!hasSearchTerm) return false
+    }
+
+    if (filters) {
+      let hasFilters = Object.entries(filters).every(([ key, value ]) => Array.isArray(listing[key]) ? listing[key].includes(value) : listing[key] === value)
+      if (!hasFilters) return false
+    }
+
+    if (age) {
+      let isCorrectAge = !age || ((!listing.max_age || age <= listing.max_age) && (!listing.min_age || age >= listing.min_age))
+      if (!isCorrectAge) return false
+    }
+    return true
+  }
   
-  return filteredListings
+  return listings.filter(searchFunction)
 }
