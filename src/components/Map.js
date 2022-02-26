@@ -173,7 +173,15 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
 
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
   const AllListings = () => listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
-  const FirstThirtyListings = () => listings.slice(0, 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+  const FirstThirtyListings = () => {
+    if (markerId) {
+      // Note: Leave this as a double equals to work around type coercion
+      const currentListing = listings.find(listing => listing.guid == markerId) 
+      return [currentListing, ...listings.slice(0, 35)].map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+    } 
+    return listings.slice(0, 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+  }
+
   
   return (
     <Card.Group as="section" itemsPerRow="1">
