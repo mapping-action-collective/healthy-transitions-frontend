@@ -117,6 +117,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
         <Grid.Column 
             as={Form.Input} width={4} type="number" placeholder="Age"
             value={age} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleAge(value)}  
            />
         {/* Location Dropdown  */}
@@ -124,6 +125,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           <Dropdown placeholder='Location' fluid search selection 
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleCity(value)}
           />
           </Grid.Column>}
@@ -163,7 +165,7 @@ const showButtonStyle = {
 function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide }) {
   const location = useLocation()
   const { markerId } = useParams()
-  const [showAll, setShowAll] = useState(false)
+  const [numCardsShowing, setNumCardsShowing] = useState(25)
   const currentCard = cardRefs[markerId]
 
   useEffect(() => {
@@ -172,20 +174,19 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   }, [currentCard, location, mapRef])
 
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
-  const AllListings = () => listings.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
-  const FirstThirtyListings = () => {
+  const FirstThirtyListings = ({numEntries}) => {
     if (markerId) {
+      const cardsToShow = listings.slice(0, numEntries)
       // Note: Leave this as a double equals to work around type coercion
-      const a = listings.slice(0, 35)
-      if (a.find(listing => listing.guid == markerId)) {
-        return a.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+      if (cardsToShow.find(listing => listing.guid == markerId)) {
+        return cardsToShow.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
       } 
       else {
         const currentListing = listings.find(listing => listing.guid == markerId) 
-        return a.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
+        return cardsToShow.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
       } 
     }
-    return listings.slice(0, 35).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+    return listings.slice(0, numEntries).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
   }
   
   return (
@@ -193,9 +194,9 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
       {/* No results found  */}
       {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
       {/* Show first 30 listings by default if filteredListings is longer than that  */}
-      {showAll ? <AllListings /> : <FirstThirtyListings />}
+      <FirstThirtyListings numEntries={numCardsShowing} />
       {/* "Show More Listings" button  */}
-      {(listings.length > 30 && showAll === false) && <Button fluid basic color='grey' icon='angle double down' content={`Show ${listings.length - 35} more results`} onClick={() => setShowAll(true)} style={showButtonStyle} />}
+      {(listings.length > numCardsShowing) && <Button fluid basic color='grey' icon='angle double down' content={`Show more results`} onClick={() => setNumCardsShowing(numCardsShowing + 25)} style={showButtonStyle} />}
     </Card.Group>
   )
 }
