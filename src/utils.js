@@ -4,6 +4,7 @@ const cities = ['Portland', 'Eugene', 'Salem', 'Gresham', 'Hillsboro', 'Bend', '
 
 export const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
+// This is here, instead of the server, since it's supposed to recalculate with each search.
 export const getCityCount = listings => {
   let cityCount = {}
   cities.forEach((e) => cityCount[e] = 0)
@@ -33,19 +34,13 @@ export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.sp
 
 export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
 
-// TODO: Move lines 37-44 to the server side
-// Filter out outliers that will skew the map view. Running the function below filters out any listing east of Burns, Oregon. We only have 2, and it skews the entire map display, so this is the shortest solution.
-const westOregon = { "min_long": -124.566244,	"min_lat": 41.991794,	"max_long": -119.0541,	"max_lat": 46.292035 }
-const isInWestOregon = (lat, long) => ((lat >= westOregon.min_lat && lat <= westOregon.max_lat) && (long >= westOregon.min_long && long <= westOregon.max_long))
 // this function accepts json listings and returns them, formatted for leaflet use
 export function formatListings(listings) {
-  listings = listings.filter(listing => isInWestOregon(listing.latitude, listing.longitude) || (!listing.latitude && !listing.longitude))
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
 // This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
 export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
-
   // if URL includes the "saved" param, display saved listings ONLY
   if (searchParams.get('saved')) {
     let savedGuids = searchParams.getAll('saved')

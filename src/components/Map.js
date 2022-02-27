@@ -27,7 +27,7 @@ function MapPage({ listings, listingMetadata }) {
     if (reset) { setSaved([]); return; }
     saved.includes(id) ? setSaved(saved.filter(e => e !== id)) : setSaved([...saved, id])
   }
-
+  
   const handleHide = (id, reset=false) => {
     if (reset) { setHidden([]); return; }
     // Remove from saved if it's saved. UX gets wonky otherwise.

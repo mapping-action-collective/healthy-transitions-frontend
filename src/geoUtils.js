@@ -1,3 +1,6 @@
+// Can be used along with usePosition to return results within a certain # of miles from the user.
+// Not in use, as of 2/26/2022
+
 // Get the distance in miles between two points. Sourced from: https://www.geodatasource.com/developers/javascript
 export function getDistance(lat1, lon1, lat2, lon2) {
 	if ((lat1 == lat2) && (lon1 == lon2)) {
@@ -37,6 +40,3 @@ export function addDistanceToListings(listings, userCoords) {
   })
 	return sortByDistance(listings)
 }
-
-// const oregonBounds = { "min_long": -124.566244,	"min_lat": 41.991794,	"max_long": -116.463504,	"max_lat": 46.292035 }
-// export const isInOregon = (lat, long) => ((lat >= oregon.min_lat && lat <= oregon.max_lat) && (long >= oregon.min_long && long <= oregon.max_long))

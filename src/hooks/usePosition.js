@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 
+// Can be used in future to get use location and then show results most relevant to them, and/or order the results by closest to them.
 const usePosition = () => {
   const [coords, setCoords] = useState({})
   const [error, setError] = useState(null)
