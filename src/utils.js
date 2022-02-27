@@ -54,10 +54,10 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
   }
 
   const { age, tag, ...filters } = Object.fromEntries(searchParams) 
-
+  // This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
   const searchFunction = (listing) => {
-    const isHidden = (hidden.includes(listing.guid)) 
-    if (isHidden) return false
+    // If listing is hidden, return false right away 
+    if (hidden.includes(listing.guid)) return false
 
     if (tag) {
       let hasTag = tag && Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())

@@ -174,13 +174,11 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   }, [currentCard, location, mapRef])
 
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
-  const FirstThirtyListings = ({numEntries}) => {
+  const CardsDisplay = ({numEntries}) => {
     if (markerId) {
       const cardsToShow = listings.slice(0, numEntries)
       // Note: Leave this as a double equals to work around type coercion
-      if (cardsToShow.find(listing => listing.guid == markerId)) {
-        return cardsToShow.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
-      } 
+      if (cardsToShow.find(listing => listing.guid == markerId)) { return cardsToShow.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) } 
       else {
         const currentListing = listings.find(listing => listing.guid == markerId) 
         return cardsToShow.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
@@ -194,7 +192,7 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
       {/* No results found  */}
       {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
       {/* Show first 30 listings by default if filteredListings is longer than that  */}
-      <FirstThirtyListings numEntries={numCardsShowing} />
+      <CardsDisplay numEntries={numCardsShowing} />
       {/* "Show More Listings" button  */}
       {(listings.length > numCardsShowing) && <Button fluid basic color='grey' icon='angle double down' content={`Show more results`} onClick={() => setNumCardsShowing(numCardsShowing + 25)} style={showButtonStyle} />}
     </Card.Group>
@@ -221,8 +219,7 @@ const starStyle = { marginRight: '.65em' }
 const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
 const cardStyle = { maxWidth: '525px' }
 const tagStyle = { color: 'dimgrey' }
-const showMoreStyle = { marginTop: 0, padding: '.45em', textAlign: 'center', fontSize: '.95em', color: 'grey'}
-const detailsStyle = { marginTop: 0, padding: '.75em' }
+const detailsStyle = { marginTop: '.10em', padding: '.75em' }
 
 const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
   const navigate = useNavigate()
