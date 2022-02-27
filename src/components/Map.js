@@ -9,7 +9,7 @@ import { useSessionStorage } from './../hooks/useSessionStorage'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
-import { filterListings } from '../utils'
+import { filterListings, getKeywordCount } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor, formatSocialMediaUrl, titleCaseKey } from '../utils'
@@ -55,12 +55,15 @@ function MapPage({ listings, listingMetadata }) {
 
   let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
   
+  // If you don't want to recalculate the two lines below on every search, just use listingMetadata.listingCities and listingMetadata.listingKeywords, respectively
+  // This is faster, but also a less rich user experience
   let listingCities = getCityCount(filteredListings ?? {})
+  const keywordCount = getKeywordCount(filteredListings ?? {})
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} keywordCount={keywordCount} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -68,7 +71,7 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave, keywordCount }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
@@ -86,10 +89,19 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
+  const handleKeyword = value => setSearchParams({ ...Object.fromEntries(searchParams), tag: value })
+  
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
   })
+
+  const keywordDropdownOptions = Object.entries(keywordCount ?? {}).map(([keyword, count]) => {
+    return { key: keyword,  text: `${keyword} (${count})`, value: keyword }
+  })
+
+  const locationDropdown = locationDropdownOptions.length > 0
+  const keywords = keywordDropdownOptions.length > 0
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
@@ -113,7 +125,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
       ) }
       </Grid>
       <Form size="tiny" className="container">
-        <Grid>
+        <Grid stackable>
         <Grid.Column 
             as={Form.Input} width={4} type="number" placeholder="Age"
             value={age} 
@@ -121,7 +133,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             onChange={(e, {value}) => handleAge(value)}  
            />
         {/* Location Dropdown  */}
-        {(locationDropdownOptions.length > 0) && <Grid.Column width={4}>
+        {locationDropdown && <Grid.Column width={4}>
           <Dropdown placeholder='Location' fluid search selection 
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
@@ -129,8 +141,18 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             onChange={(e, {value}) => handleCity(value)}
           />
           </Grid.Column>}
+        {/* Keyword Dropdown  */}
+        {keywords && <Grid.Column width={4}>
+          <Dropdown placeholder='Keyword' fluid search selection 
+            options={keywordDropdownOptions} 
+            value={searchParams.get('tag') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+            onChange={(e, {value}) => handleKeyword(value)}
+          />
+          </Grid.Column>}
           <Grid.Column 
-            as={Form.Input} width={locationDropdownOptions.length > 0 ? 8 : 12} tabIndex="1" 
+            // Semantic UI grid system is 16 wide 
+            as={Form.Input} width={(keywords && locationDropdown) ? 4 : keywords ? 8 : locationDropdown ? 8 : 12} tabIndex="1" 
             placeholder="Search" 
             action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 

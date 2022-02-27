@@ -19,6 +19,20 @@ export const getCityCount = listings => {
   return Object.fromEntries(Object.entries(cityCount).filter(([k, v]) => v !== 0))
 }
 
+// Can be fetched from API, or recalculated on search
+export const getKeywordCount = listings => {
+  let keywordCount = {}
+  listings.forEach((listing) => {
+    if (listing.keywords) {
+      listing.keywords.forEach((keyword) => {
+        if (!keywordCount[`${keyword}`]) keywordCount[`${keyword}`] = 1
+        else keywordCount[`${keyword}`] ++
+      })
+    }
+  })
+  return keywordCount
+}
+
 export const getCategoryCount = (listings) => {
   let listingCategories = {}
   listings.forEach((listing) => {
