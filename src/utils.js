@@ -43,8 +43,7 @@ export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
-// this function accepts listings, and filters according to a search string
-// the Object.entries bit just means we're joining all the text fields before searching on them
+// This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
 export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
 
   // if URL includes the "saved" param, display saved listings ONLY
@@ -54,12 +53,12 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
   }
 
   const { age, tag, ...filters } = Object.fromEntries(searchParams) 
-  // This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
   const searchFunction = (listing) => {
-    // If listing is hidden, return false right away 
-    if (hidden.includes(listing.guid)) return false
+    const isHidden = (hidden.includes(listing.guid)) 
+    if (isHidden) return false
 
     if (tag) {
+      // the Object.entries bit just means we're joining all the text fields before searching on them
       let hasTag = tag && Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())
       if (!hasTag) return false
     }
