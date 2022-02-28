@@ -150,8 +150,8 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
       <Form size="tiny" className="container">
-      <Grid stackable relaxed>
-        <Grid.Column width={2}>
+      <Grid stackable columns='equal'>
+        <Grid.Column>
           <Input type="number" label="Age"  style={{paddingRight: '3em'}}
             value={age} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
@@ -159,9 +159,9 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
         </Grid.Column>
         {/* Location Dropdown  */}
         {locationDropdown && 
-        <Grid.Column width={4}>
-          <Dropdown placeholder='Location' search 
-            button
+        <Grid.Column>
+          <Dropdown placeholder='Location' search style={{width: '100%'}}
+            button fluid
             className='icon'
             labeled
             icon='map marker alternate'
@@ -173,8 +173,8 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           />
           </Grid.Column>}
         {/* Keyword Dropdown  */}
-        {keywords && <Grid.Column width={4}>
-          <Dropdown placeholder='Keyword' search 
+        {/* {keywords && <Grid.Column>
+          <Dropdown placeholder='Keyword' search fluid
             button className='icon' icon='hashtag' labeled
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
@@ -182,11 +182,11 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             onChange={(e, {value}) => handleKeyword(value)}
             style={{zIndex: 2}}
           />
-          </Grid.Column>}
+          </Grid.Column>} */}
           <Grid.Column 
             // Semantic UI grid system is 16 wide 
             as={Form.Input} 
-            width={locationDropdownOptions. length > 0 ? 8 : 14}
+            width={8}
             // width={(keywords && locationDropdown) ? 5 : keywords ? 9 : locationDropdown ? 9 : 13} 
             tabIndex="1" 
             placeholder="Search" 
