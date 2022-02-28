@@ -146,13 +146,37 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const locationDropdown = locationDropdownOptions.length > 0
   const keywords = keywordDropdownOptions.length > 0
 
+  const inputStyle = { marginTop: '1.5em', marginBottom: '.5em', color: 'grey'}
+
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
       <Form size="tiny" className="container">
-      <Grid stackable columns='equal'>
-        <Grid.Column>
-          <Input type="number" label="Age"  style={{paddingRight: '3em'}}
+      <Grid columns='equal' stackable style={{marginTop: '1em'}}>
+        <Grid.Column width={4}>
+          <Button basic floated='right' inverted color='teal' fluid size='small'
+              icon={searchParams.get('saved') ? 'list' : 'star outline'}
+              content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
+              disabled={saved.length === 0 && !searchParams.get('saved')} 
+              onClick={() => handleShowSaved(saved)}
+              style={{minWidth: '150px'}}
+              />
+        </Grid.Column>
+        <Grid.Column
+              // Semantic UI grid system is 16 wide 
+              as={Form.Input} 
+              // width={8}
+              // width={(keywords && locationDropdown) ? 5 : keywords ? 9 : locationDropdown ? 9 : 13} 
+              tabIndex="1" 
+              placeholder="Search" 
+              action={{icon: "search"}} 
+              onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+              onChange={(e, {value}) => debouncedSearch(value)} />
+      </Grid>
+
+      <Grid stackable columns='equal' style={{marginBottom: '.25em'}}>
+      <Grid.Column>
+          <Input type="number" label="Age" style={{paddingRight: '3.25em'}}
             value={age} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleAge(value)} />
@@ -173,7 +197,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           />
           </Grid.Column>}
         {/* Keyword Dropdown  */}
-        {/* {keywords && <Grid.Column>
+        {keywords && <Grid.Column>
           <Dropdown placeholder='Keyword' search fluid
             button className='icon' icon='hashtag' labeled
             options={keywordDropdownOptions} 
@@ -182,30 +206,22 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             onChange={(e, {value}) => handleKeyword(value)}
             style={{zIndex: 2}}
           />
-          </Grid.Column>} */}
-          <Grid.Column 
-            // Semantic UI grid system is 16 wide 
-            as={Form.Input} 
-            width={8}
-            // width={(keywords && locationDropdown) ? 5 : keywords ? 9 : locationDropdown ? 9 : 13} 
-            tabIndex="1" 
-            placeholder="Search" 
-            action={{icon: "search"}} 
-            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => debouncedSearch(value)} />
+          </Grid.Column>}
+
         </Grid>
+
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             {!location.search.includes('saved') &&
             [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{titleCaseKey(key.replace(/_/ig,` `))}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
             {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
             {/* <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Clear Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
-            <Button basic floated='right' inverted color='teal' size='tiny' 
+            {/* <Button basic floated='right' inverted color='teal' size='tiny' 
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
               content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
               disabled={saved.length === 0 && !searchParams.get('saved')} 
               onClick={() => handleShowSaved(saved)}
-              />
+              /> */}
           </Label.Group>
         </div>
       </Form>
