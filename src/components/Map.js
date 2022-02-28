@@ -1,7 +1,7 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Dropdown, Button } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { useSessionStorage } from './../hooks/useSessionStorage'
@@ -71,6 +71,28 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
+// const MainIconMenu = React.memo(
+//   <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
+//   { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
+//     <Dropdown as="li" className="column" icon={null}
+//       key={parentCategory} 
+//       text={<>
+//         <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
+//         <header>{parentCategory}</header></>
+//       }>
+
+//       <Dropdown.Menu as="menu">
+//       {Object.entries(subCategories).map(([subCategory, count]) =>
+//         <Dropdown.Item key={subCategory} as={NavLink} 
+//           text={`${subCategory} (${count})`} 
+//           to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
+//       )}
+//       </Dropdown.Menu>
+//     </Dropdown>
+//   ) }
+//   </Grid>
+// )
+
 function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave, keywordCount }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -81,6 +103,27 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   useEffect(() => {
     setAge(searchParams.get('age') ?? '')
   },[searchParams])
+
+  const MainIconMenu = ()  => 
+    <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
+    { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
+      <Dropdown as="li" className="column" icon={null}
+        key={parentCategory} 
+        text={<>
+          <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
+          <header>{parentCategory}</header></>
+        }>
+
+        <Dropdown.Menu as="menu">
+        {Object.entries(subCategories).map(([subCategory, count]) =>
+          <Dropdown.Item key={subCategory} as={NavLink} 
+            text={`${subCategory} (${count})`} 
+            to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
+        )}
+        </Dropdown.Menu>
+      </Dropdown>
+    ) }
+    </Grid>
 
   const debouncedAge = debounce((value) => { setSearchParams({ ...Object.fromEntries(searchParams), age: value })}, 500)
 
@@ -105,54 +148,47 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
-      <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
-      { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
-        <Dropdown as="li" className="column" icon={null}
-          key={parentCategory} 
-          text={<>
-            <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
-            <header>{parentCategory}</header></>
-          }>
-
-          <Dropdown.Menu as="menu">
-          {Object.entries(subCategories).map(([subCategory, count]) =>
-            <Dropdown.Item key={subCategory} as={NavLink} 
-              text={`${subCategory} (${count})`} 
-              to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
-          )}
-          </Dropdown.Menu>
-        </Dropdown>
-      ) }
-      </Grid>
+      <MainIconMenu />
       <Form size="tiny" className="container">
-        <Grid stackable>
-        <Grid.Column 
-            as={Form.Input} width={4} type="number" placeholder="Age"
+      <Grid stackable relaxed>
+        <Grid.Column width={2}>
+          <Input type="number" label="Age"  style={{paddingRight: '3em'}}
             value={age} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleAge(value)}  
-           />
+            onChange={(e, {value}) => handleAge(value)} />
+        </Grid.Column>
         {/* Location Dropdown  */}
-        {locationDropdown && <Grid.Column width={4}>
-          <Dropdown placeholder='Location' fluid search selection 
+        {locationDropdown && 
+        <Grid.Column width={4}>
+          <Dropdown placeholder='Location' search 
+            button
+            className='icon'
+            labeled
+            icon='map marker alternate'
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleCity(value)}
+            style={{zIndex: 2}}
           />
           </Grid.Column>}
         {/* Keyword Dropdown  */}
         {keywords && <Grid.Column width={4}>
-          <Dropdown placeholder='Keyword' fluid search selection 
+          <Dropdown placeholder='Keyword' search 
+            button className='icon' icon='hashtag' labeled
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleKeyword(value)}
+            style={{zIndex: 2}}
           />
           </Grid.Column>}
           <Grid.Column 
             // Semantic UI grid system is 16 wide 
-            as={Form.Input} width={(keywords && locationDropdown) ? 4 : keywords ? 8 : locationDropdown ? 8 : 12} tabIndex="1" 
+            as={Form.Input} 
+            width={locationDropdownOptions. length > 0 ? 8 : 14}
+            // width={(keywords && locationDropdown) ? 5 : keywords ? 9 : locationDropdown ? 9 : 13} 
+            tabIndex="1" 
             placeholder="Search" 
             action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
