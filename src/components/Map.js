@@ -9,7 +9,7 @@ import { useSessionStorage } from './../hooks/useSessionStorage'
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
-import { filterListings, getKeywordCount } from '../utils'
+import { filterListings, getKeywordCount, getCostCount } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor, formatSocialMediaUrl, titleCaseKey } from '../utils'
@@ -59,11 +59,13 @@ function MapPage({ listings, listingMetadata }) {
   // This is faster, but also a less rich user experience
   let listingCities = getCityCount(filteredListings ?? {})
   const keywordCount = getKeywordCount(filteredListings ?? {})
+  const costCount = getCostCount(filteredListings ?? {})
+  
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} keywordCount={keywordCount} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} keywordCount={keywordCount} costCount={costCount} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
     <Container as="main" id="map-page">
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
@@ -71,34 +73,12 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-// const MainIconMenu = React.memo(
-//   <Grid as="menu" columns={Object.keys(listingCategories).length} doubling container textAlign="center">
-//   { Object.entries(listingCategories).map(([parentCategory, subCategories]) =>
-//     <Dropdown as="li" className="column" icon={null}
-//       key={parentCategory} 
-//       text={<>
-//         <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
-//         <header>{parentCategory}</header></>
-//       }>
-
-//       <Dropdown.Menu as="menu">
-//       {Object.entries(subCategories).map(([subCategory, count]) =>
-//         <Dropdown.Item key={subCategory} as={NavLink} 
-//           text={`${subCategory} (${count})`} 
-//           to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), category: `${parentCategory}: ${subCategory}` }).toString()}`} />
-//       )}
-//       </Dropdown.Menu>
-//     </Dropdown>
-//   ) }
-//   </Grid>
-// )
-
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave, keywordCount }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave, keywordCount, costCount }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
-  const [showExtraFilters, setShowExtraFilters] = useState(true)
+  const [showExtraFilters, setShowExtraFilters] = useState(false)
 
   // When user clears the params, this clears the input value as well
   useEffect(() => {
@@ -134,6 +114,8 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
 
   const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
   const handleKeyword = value => setSearchParams({ ...Object.fromEntries(searchParams), tag: value })
+
+  const handleCost = value => setSearchParams({ ...Object.fromEntries(searchParams), cost: value })
   
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
@@ -144,17 +126,20 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
     return { key: keyword,  text: `${keyword} (${count})`, value: keyword }
   })
 
+  const costDropdownOptions = Object.entries(costCount ?? {}).map(([cost, count]) => {
+    return { key: cost,  text: `${cost} (${count})`, value: cost }
+  })
+
   const locationDropdown = locationDropdownOptions.length > 0
   const keywords = keywordDropdownOptions.length > 0
-
-  const inputStyle = { marginTop: '1.5em', marginBottom: '.5em', color: 'grey'}
+  const cost = costDropdownOptions.length > 0
 
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
-      {showExtraFilters && <Divider style={{marginBottom: 0, marginTop: '.5em'}} />}
+      {/* {showExtraFilters && <Divider style={{marginBottom: 0, marginTop: '.5em'}} />} */}
       <Form size="tiny" className="container">
-      {/* Saved Button  */}
+      {/* Search Input + "Show Saved" Button  */}
       <Grid columns='equal' stackable style={showExtraFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
         <Grid.Column width={4}>
           <Button basic floated='right' inverted color='teal' fluid size='small'
@@ -170,39 +155,42 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           <Input 
             tabIndex="1" fluid
             style={{width: '100%', paddingRight: '.5em'}}
-            placeholder="Search" 
-            action={{icon: "search"}} 
+            icon='search'
+            iconPosition="left"
+            placeholder="Search..." 
+            // action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => debouncedSearch(value)} 
           />
           <Button 
-            icon={<Icon name={showExtraFilters? "angle up" : "filter"} color="white" />}
-            basic inverted
+            icon={<Icon name={showExtraFilters? "angle up" : "filter"} />}
+            // basic inverted
             // Styles that toggle when it's active or inactive
             // basic={showExtraFilters} inverted={showExtraFilters} 
             onClick={() => setShowExtraFilters(!showExtraFilters)}
             style={{maxHeight: '35px'}}
             />
           </Grid.Column>
-        </Grid>
+      </Grid>
 
       {/* Optional Filters  */}
       {showExtraFilters &&
       <Grid stackable columns='equal' style={{marginBottom: '.25em', marginTop: 0}}>
         {/* Age Input  */}
-        <Grid.Column width={4}>
+        <Grid.Column width={2}>
           <Input type="number" id='age-input' fluid
             placeholder='Age'
             value={age}
-            icon='sort' iconPosition="left"
+            // icon='sort' iconPosition="left"
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleAge(value)} />
           </Grid.Column>
       {/* Location Dropdown  */}
       {locationDropdown && 
         <Grid.Column>
-          <Dropdown placeholder='Location' search
-            fluid button
+          <Dropdown placeholder='Location' search id="location-input"
+            fluid 
+            button
             className='icon'
             labeled
             label='Location'
@@ -217,13 +205,25 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
         {/* Keyword Dropdown  */}
         {keywords && 
         <Grid.Column>
-          <Dropdown placeholder='Population' search fluid
-            button className='icon' icon='user' labeled
+          <Dropdown placeholder='Population' search fluid id="population-input"
+            button className='icon' icon='user' labeled inverted
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleKeyword(value)}
-            style={{zIndex: 2, marginRight: "25px"}}
+            style={{zIndex: 2}}
+          />
+          </Grid.Column>}
+        {/* COST DROPDOWN  */}
+        {cost && 
+        <Grid.Column>
+          <Dropdown placeholder='Cost' search fluid id="population-input"
+            button className='icon' icon='dollar sign' labeled inverted
+            options={costDropdownOptions} 
+            value={searchParams.get('cost') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+            onChange={(e, {value}) => handleCost(value)}
+            style={{zIndex: 2}}
           />
           </Grid.Column>}
         </Grid>}
