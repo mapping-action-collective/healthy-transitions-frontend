@@ -1,7 +1,7 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Input, Dropdown, Button, Divider } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { useSessionStorage } from './../hooks/useSessionStorage'
@@ -98,6 +98,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
+  const [showExtraFilters, setShowExtraFilters] = useState(true)
 
   // When user clears the params, this clears the input value as well
   useEffect(() => {
@@ -151,8 +152,10 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
+      {showExtraFilters && <Divider style={{marginBottom: 0, marginTop: '.5em'}} />}
       <Form size="tiny" className="container">
-      <Grid columns='equal' stackable style={{marginTop: '1em'}}>
+      {/* Saved Button  */}
+      <Grid columns='equal' stackable style={showExtraFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
         <Grid.Column width={4}>
           <Button basic floated='right' inverted color='teal' fluid size='small'
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
@@ -162,32 +165,47 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
               style={{minWidth: '150px'}}
               />
         </Grid.Column>
-        <Grid.Column
-              // Semantic UI grid system is 16 wide 
-              as={Form.Input} 
-              // width={8}
-              // width={(keywords && locationDropdown) ? 5 : keywords ? 9 : locationDropdown ? 9 : 13} 
-              tabIndex="1" 
-              placeholder="Search" 
-              action={{icon: "search"}} 
-              onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-              onChange={(e, {value}) => debouncedSearch(value)} />
-      </Grid>
+        {/* Search Text Input  */}
+        <Grid.Column style={{display: 'flex'}}>
+          <Input 
+            tabIndex="1" fluid
+            style={{width: '100%', paddingRight: '.5em'}}
+            placeholder="Search" 
+            action={{icon: "search"}} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+            onChange={(e, {value}) => debouncedSearch(value)} 
+          />
+          <Button 
+            icon={<Icon name={showExtraFilters? "angle up" : "filter"} color="white" />}
+            basic inverted
+            // Styles that toggle when it's active or inactive
+            // basic={showExtraFilters} inverted={showExtraFilters} 
+            onClick={() => setShowExtraFilters(!showExtraFilters)}
+            style={{maxHeight: '35px'}}
+            />
+          </Grid.Column>
+        </Grid>
 
-      <Grid stackable columns='equal' style={{marginBottom: '.25em'}}>
-      <Grid.Column>
-          <Input type="number" label="Age" style={{paddingRight: '3.25em'}}
-            value={age} 
+      {/* Optional Filters  */}
+      {showExtraFilters &&
+      <Grid stackable columns='equal' style={{marginBottom: '.25em', marginTop: 0}}>
+        {/* Age Input  */}
+        <Grid.Column width={4}>
+          <Input type="number" id='age-input' fluid
+            placeholder='Age'
+            value={age}
+            icon='sort' iconPosition="left"
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleAge(value)} />
-        </Grid.Column>
-        {/* Location Dropdown  */}
-        {locationDropdown && 
+          </Grid.Column>
+      {/* Location Dropdown  */}
+      {locationDropdown && 
         <Grid.Column>
-          <Dropdown placeholder='Location' search style={{width: '100%'}}
-            button fluid
+          <Dropdown placeholder='Location' search
+            fluid button
             className='icon'
             labeled
+            label='Location'
             icon='map marker alternate'
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
@@ -197,19 +215,18 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           />
           </Grid.Column>}
         {/* Keyword Dropdown  */}
-        {keywords && <Grid.Column>
-          <Dropdown placeholder='Keyword' search fluid
-            button className='icon' icon='hashtag' labeled
+        {keywords && 
+        <Grid.Column>
+          <Dropdown placeholder='Population' search fluid
+            button className='icon' icon='user' labeled
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleKeyword(value)}
-            style={{zIndex: 2}}
+            style={{zIndex: 2, marginRight: "25px"}}
           />
           </Grid.Column>}
-
-        </Grid>
-
+        </Grid>}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
           <Label.Group columns={[...searchParams].length} className="doubling container">
             {!location.search.includes('saved') &&

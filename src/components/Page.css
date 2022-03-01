@@ -16,4 +16,13 @@ html, body { overflow: hidden; }
 
 .mac-logo { text-transform: uppercase !important; white-space: pre; color: white !important; opacity: 0.75; }
 
+#age-input::placeholder {
+  color: dimgrey;
+}
+
+#age-input {
+  background-color: #E0E1E2;
+  font-weight: bold;
+}
+
 /* Semantic Grey: F3F4F5 */
