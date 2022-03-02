@@ -36,10 +36,10 @@ export const getKeywordCount = listings => {
 export const getCostCount = listings => {
   let costCount = {}
   listings.forEach((listing) => {
-    if (listing.cost) {
-      listing.cost.forEach((cost) => {
-        if (!costCount[`${cost}`]) costCount[`${cost}`] = 1
-        else costCount[`${cost}`] ++
+    if (listing.cost_keywords) {
+      listing.cost_keywords.forEach((keyword) => {
+        if (!costCount[`${keyword}`]) costCount[`${keyword}`] = 1
+        else costCount[`${keyword}`] ++
       })
     }
   })
@@ -61,20 +61,33 @@ export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.sp
 
 export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
 
-const cost = ["Low Cost", "Free", "OHP", "Accepts Uninsured", "Sliding Scale"]
+const cost = ["Low Cost", "Free", "OHP", "Accepts Uninsured", "Sliding Scale", "Financial Aid Available"]
+
+const addCostToListing = listing => {
+  // Staging already does this server-side. If it's already in place, skip.
+  if (listing.cost_keywords && listing.cost_keywords?.length > 0) return listing
+
+  else if (listing.keywords) {
+    let keywords = listing.keywords
+    // Grab cost-related keywords out of the general keywords array
+    const costKeywords = keywords.filter(keyword => cost.includes(keyword))
+    if (costKeywords && costKeywords?.length > 0) listing.cost = [...costKeywords]
+    // Remove cost keywords from main keywords array. This will happen server-side; this is a temporary patch.
+    keywords = keywords.filter(keyword => !cost.includes(keyword)) 
+    listing.keywords = keywords
+    return listing;
+  }
+  return listing;
+}
 
 // this function accepts json listings and returns them, formatted for leaflet use
 export function formatListings(listings) {
-  // Add "cost" tags. TEMPORARY - for testing/demo only
-  listings = listings.map(({keywords, ...listing}) => {
-    if (keywords) {
-      const costKeywords = keywords.filter(keyword => cost.includes(keyword))
-      listing.cost = costKeywords
-      keywords = keywords.filter(keyword => !cost.includes(keyword)) 
-      listing.keywords = keywords
-      return listing;
+  // patch. TODO: fix on the BE and remove
+  listings = listings.map(listing => {
+    if (listing.cost_keywords && listing.cost_keywords?.length > 0) {
+      listing.cost = listing.cost_keywords
     }
-    return listing; 
+    return listing
   })
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
