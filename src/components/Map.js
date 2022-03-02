@@ -112,11 +112,35 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   // Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
   const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
 
-  const handleCity = value => setSearchParams({ ...Object.fromEntries(searchParams), city: value })
-  const handleKeyword = value => setSearchParams({ ...Object.fromEntries(searchParams), tag: value })
+  const handleCity = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), city: value }) }
 
-  const handleCost = value => setSearchParams({ ...Object.fromEntries(searchParams), cost: value })
+  const handleKeyword = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) }
+
+  const handleCost = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), cost: value }) } 
   
+  // const handleCity = (event, value) => {
+  //   // We need this check, otherwise it changes on blur as well
+  //   if (event.type === 'click') {
+  //     setSearchParams({ ...Object.fromEntries(searchParams), city: value })
+  //   }
+  // }
+  
+  // const handleKeyword = (event, value) => {
+  //   // We need this check, otherwise it changes on blur as well
+  //   if (event.type === 'click') {
+  //     setSearchParams({ ...Object.fromEntries(searchParams), tag: value })
+  //   }
+  // }
+  
+  // const handleCost = (event, value) => {
+  //   // We need this check, otherwise it changes on blur as well
+  //   if (event.type === 'click') {
+  //     setSearchParams({ ...Object.fromEntries(searchParams), cost: value })
+  //   }
+  // }
+
+
+  const logEvent = (e, value) => console.log('event', e, 'value', value)
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
@@ -198,7 +222,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             options={locationDropdownOptions} 
             value={searchParams.get('city') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleCity(value)}
+            onChange={(e, {value}) => handleCity(e.type, value)}
             style={{zIndex: 2}}
           />
           </Grid.Column>}
@@ -209,8 +233,9 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             button className='icon' icon='user' labeled inverted
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
+            // Todo: Do I need this onFocus here? Investigate
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleKeyword(value)}
+            onChange={(e, {value}) => handleKeyword(e.type, value)}
             style={{zIndex: 2}}
           />
           </Grid.Column>}
@@ -222,7 +247,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
             options={costDropdownOptions} 
             value={searchParams.get('cost') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleCost(value)}
+            onChange={(e, {value}) => handleCost(e.type,value)}
             style={{zIndex: 2}}
           />
           </Grid.Column>}
