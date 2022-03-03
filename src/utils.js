@@ -91,14 +91,16 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
     const isHidden = (hidden.includes(listing.guid)) 
     if (isHidden) return false
 
+    const listingEntries = Object.entries(listing).join(" ").toLowerCase()
+
     if (tag) {
       // the Object.entries bit just means we're joining all the text fields before searching on them
-      let hasTag = Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())
+      let hasTag = listingEntries.includes(tag.toLowerCase())
       if (!hasTag) return false
     }
 
     if (search) {
-      let hasSearchTerm = Object.entries(listing).join(" ").toLowerCase().match(search.toLowerCase())
+      let hasSearchTerm = listingEntries.includes(search.toLowerCase())
       if (!hasSearchTerm) return false
     }
 
