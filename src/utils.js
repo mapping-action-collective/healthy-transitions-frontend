@@ -31,7 +31,7 @@ export const getKeywordCount = listings => {
     }
   })
   // Filter out keywords with less than 3 occurances
-  keywordCount = Object.fromEntries(Object.entries(keywordCount).filter(e => e[1] >= 5))
+  // keywordCount = Object.fromEntries(Object.entries(keywordCount).filter(e => e[1] >= 5))
   return keywordCount
 }
 

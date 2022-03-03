@@ -353,6 +353,12 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
     <div style={blueCheckStyle}><Icon name='check' color={cardColor} /> Verified by {name} on {date}</div>
   )
 
+  const SocialMediaDisplay = ({link, iconName}) => (
+    <Card.Description><Icon name={iconName} /><a target="_blank" rel="noreferrer" href={link}>{formatSocialMediaUrl(link)}</a></Card.Description> 
+  )
+
+  const KeywordDisplay = ({arr}) => arr.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> ) 
+
   return (
     <Ref innerRef={ref}>
       <Card as="article" color={cardColor} centered raised className="map-card" style={cardStyle}>
@@ -409,7 +415,8 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
         </Card.Content>
         {/* Show keywords and/or cost_keywords if they exist. If not, show category so cards have consistent design */}
         <Card.Content extra>
-          { (keywords || cost_keywords) ? [...keywords, ...cost_keywords].map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> ) 
+          { (keywords && cost_keywords) ? <KeywordDisplay arr={[...keywords, ...cost_keywords]} /> 
+          : keywords ? <KeywordDisplay arr={keywords} /> : cost_keywords ? <KeywordDisplay arr={cost_keywords} />
           : <NavLink to={`/?category=${encodeURIComponent(category)}`}># {category.split(':')[1]}</NavLink>}
         </Card.Content>
       </Card>
