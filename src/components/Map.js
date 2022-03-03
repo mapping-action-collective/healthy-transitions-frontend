@@ -12,7 +12,7 @@ import 'react-leaflet-markercluster/dist/styles.min.css';
 import { filterListings, getKeywordCount, getCostCount } from '../utils'
 import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
-import { getCityCount, getColor, formatSocialMediaUrl, titleCaseKey } from '../utils'
+import { getCityCount, getColor, titleCaseKey } from '../utils'
 
 function MapPage({ listings, listingMetadata }) {
   const [ searchParams, ] = useSearchParams()
@@ -57,9 +57,9 @@ function MapPage({ listings, listingMetadata }) {
   
   // If you don't want to recalculate the two lines below on every search, just use listingMetadata.listingCities and listingMetadata.listingKeywords, respectively
   // This is faster, but also a less rich user experience
-  let listingCities = getCityCount(filteredListings ?? {})
-  const keywordCount = getKeywordCount(filteredListings ?? {})
-  const costCount = getCostCount(filteredListings ?? {})
+  let listingCities = useMemo(() => getCityCount(filteredListings ?? {}), [filteredListings])
+  const keywordCount = useMemo(() => getKeywordCount(filteredListings ?? {}), [filteredListings])
+  const costCount = useMemo(() => getCostCount(filteredListings ?? {}), [filteredListings])
   
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
   const mapRef = createRef()
@@ -73,12 +73,12 @@ function MapPage({ listings, listingMetadata }) {
   </>)
 }
 
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, showSaved, handleShowSaved, hidden, handleHide, handleSave, keywordCount, costCount }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleShowSaved, keywordCount, costCount }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
-  const [showExtraFilters, setShowExtraFilters] = useState(false)
+  const [showSearchFilters, setShowSearchFilters] = useState(false)
 
   // When user clears the params, this clears the input value as well
   useEffect(() => {
@@ -94,7 +94,6 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           <Icon size="big" name={listingCategoryIcons[parentCategory]?.icon} />
           <header>{parentCategory}</header></>
         }>
-
         <Dropdown.Menu as="menu">
         {Object.entries(subCategories).map(([subCategory, count]) =>
           <Dropdown.Item key={subCategory} as={NavLink} 
@@ -113,6 +112,8 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
 
   const handleCity = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), city: value }) }
+
+  // const logEvent = (event, value) => console.log(event)
 
   const handleKeyword = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) }
 
@@ -138,10 +139,9 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
 return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
-      {/* {showExtraFilters && <Divider style={{marginBottom: 0, marginTop: '.5em'}} />} */}
       <Form size="tiny" className="container">
-      {/* Search Input + "Show Saved" Button  */}
-      <Grid columns='equal' stackable style={showExtraFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
+      {/* Search Input & "Show Saved" Button  */}
+      <Grid columns='equal' stackable style={showSearchFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
         <Grid.Column width={4}>
           <Button basic floated='right' inverted color='teal' fluid size='small'
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
@@ -164,25 +164,22 @@ return (<>
             onChange={(e, {value}) => debouncedSearch(value)} 
           />
           <Button 
-            icon={<Icon name={showExtraFilters? "angle up" : "filter"} />}
-            // basic inverted
-            // Styles that toggle when it's active or inactive
-            // basic={showExtraFilters} inverted={showExtraFilters} 
-            onClick={() => setShowExtraFilters(!showExtraFilters)}
+            icon={<Icon name={showSearchFilters? "angle up" : "filter"} />}
+            onClick={() => setShowSearchFilters(!showSearchFilters)}
             style={{maxHeight: '35px'}}
             />
           </Grid.Column>
       </Grid>
 
       {/* Optional Filters  */}
-      {showExtraFilters &&
+      {showSearchFilters &&
       <Grid stackable columns='equal' style={{marginBottom: '.25em', marginTop: 0}}>
         {/* Age Input  */}
         <Grid.Column width={2}>
           <Input type="number" id='age-input' fluid
             placeholder='Age'
             value={age}
-            // icon='sort' iconPosition="left"
+            // TODO: clear search params if they include "saved." Otherwise, UX gets wonky.
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleAge(value)} />
           </Grid.Column>
@@ -200,6 +197,7 @@ return (<>
             value={searchParams.get('city') || ``} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleCity(e.type, value)}
+            // onChange={(e, {value}) =>logEvent(e, value)}
             style={{zIndex: 2}}
           />
           </Grid.Column>}
