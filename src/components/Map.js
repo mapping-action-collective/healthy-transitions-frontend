@@ -315,48 +315,54 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   )
 }
 
-const CardCornerDropdown = ({ index, guid, handleHide }) => {
+const CardCornerDropdown = ({ cardColor, guid, handleHide }) => {
   return (
     <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
       <Dropdown.Menu>
         <Dropdown.Item text='Copy link'icon='share alternate' id={`share=${guid}`}
         onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
         />
-        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: getColor(index)}} />
+        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: cardColor}} />
         <Dropdown.Item onClick={() => handleHide(guid)}
-          text='Hide listing' icon={{ name: 'eye slash outline', color: getColor(index)}} />
+          text='Hide listing' icon={{ name: 'eye slash outline', color: cardColor}} />
       </Dropdown.Menu>
     </Dropdown>
   )
 }
 
-// TODO: Move these and/or rewrite with proper CSS classes 
 const starStyle = { marginRight: '.65em' }
 const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
 const cardStyle = { maxWidth: '525px' }
 const tagStyle = { color: 'dimgrey' }
 const detailsStyle = { marginTop: '.10em', padding: '.75em' }
+const blueCheckStyle = { color: 'grey', fontStyle: 'italic' }
 
-const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, video_description, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, ...listing}, saved, handleSave, handleHide, index}, ref) => {
+const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, index}, ref) => {
+  const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified } = listing
+
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
-
+  const cardColor = getColor(index)
   const updateSearchParams = (key, val) => {
     const currentParams = Object.fromEntries([...searchParams])
     const newParams = { ...currentParams, key: val }
     setSearchParams(newParams)
   }
 
+  const BlueCheck = ({name, date}) => (
+    <div style={blueCheckStyle}><Icon name='check' color={cardColor} /> Verified by {name} on {date}</div>
+  )
+
   return (
     <Ref innerRef={ref}>
-      <Card as="article" color={getColor(index)} centered raised className="map-card" style={cardStyle}>
+      <Card as="article" color={cardColor} centered raised className="map-card" style={cardStyle}>
         <Card.Content>
         {/* Extra divs are necessary for flex box spacing  */}
           <div style={labelDivStyle}>
-            <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={getColor(index)} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
+            <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={cardColor} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
             <div> 
-              <Icon name={saved ? 'star' : 'star outline'} color={getColor(index)} style={starStyle} onClick={() => handleSave(guid)} />
-              {CardCornerDropdown({index, guid, full_address, mapRef, handleHide})}
+              <Icon name={saved ? 'star' : 'star outline'} color={cardColor} style={starStyle} onClick={() => handleSave(guid)} />
+              {CardCornerDropdown({cardColor, guid, full_address, mapRef, handleHide})}
             </div>
           </div>
           {/* Header  */}
@@ -378,6 +384,7 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialMediaUrl(instagram_link)}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
           </Segment>
+          {(agency_verified && date_agency_verified) && <BlueCheck name={full_name} date={date_agency_verified} />}
           {/* Description  */}
           <Segment basic vertical>
             <ExpandableDescription label="Description" value={description} />
@@ -388,8 +395,9 @@ const MapCard = forwardRef(({ mapRef, listing: { guid, category, coords, parent_
             { eligibility_requirements && <Card.Description><Card.Header as="strong">Eligibility:</Card.Header> {eligibility_requirements}</Card.Description>}
             {financial_information && <Card.Description><Card.Header as="strong">Cost:</Card.Header> {financial_information.includes(`\n`) ? financial_information.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p key={index}>{paragraph}</p>) : financial_information}</Card.Description>}
             { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p key={index}>{paragraph}</p>) : intake_instructions}</Card.Description>}
-            { languages_offered && <ValueList name="Languages" values={languages_offered} /> }
-            { services_provided && <ValueList name="Services" values={services_provided} /> }
+            {/* Languages is an array  */}
+            { languages_offered && <Card.Description><Card.Header as="strong">Languages: </Card.Header>{languages_offered.join(", ")}</Card.Description> }
+            {/* { services_provided && <ValueList name="Services" values={services_provided} /> } */}
           </Segment>
           { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Ages:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>

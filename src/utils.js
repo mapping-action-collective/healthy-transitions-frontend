@@ -89,6 +89,7 @@ export function formatListings(listings) {
     }
     return listing
   })
+  console.log(listings)
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
