@@ -30,8 +30,12 @@ export const getKeywordCount = listings => {
       })
     }
   })
+  // Filter out keywords with less than 3 occurances
+  keywordCount = Object.fromEntries(Object.entries(keywordCount).filter(e => e[1] >= 5))
   return keywordCount
 }
+
+export const costKeywords = ['OHP', 'Private Insurance', 'Financial Aid Available', 'Free', 'Accepts Uninsured', 'Sliding Scale', 'Low Cost', 'Medicare / Medicaid']
 
 export const getCostCount = listings => {
   let costCount = {}
