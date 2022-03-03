@@ -117,30 +117,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const handleKeyword = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) }
 
   const handleCost = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), cost: value }) } 
-  
-  // const handleCity = (event, value) => {
-  //   // We need this check, otherwise it changes on blur as well
-  //   if (event.type === 'click') {
-  //     setSearchParams({ ...Object.fromEntries(searchParams), city: value })
-  //   }
-  // }
-  
-  // const handleKeyword = (event, value) => {
-  //   // We need this check, otherwise it changes on blur as well
-  //   if (event.type === 'click') {
-  //     setSearchParams({ ...Object.fromEntries(searchParams), tag: value })
-  //   }
-  // }
-  
-  // const handleCost = (event, value) => {
-  //   // We need this check, otherwise it changes on blur as well
-  //   if (event.type === 'click') {
-  //     setSearchParams({ ...Object.fromEntries(searchParams), cost: value })
-  //   }
-  // }
 
-
-  const logEvent = (e, value) => console.log('event', e, 'value', value)
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
     return { key: cityName,  text: `${cityName} (${count})`, value: cityName }
@@ -158,7 +135,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const keywords = keywordDropdownOptions.length > 0
   const cost = costDropdownOptions.length > 0
 
-  return (<>
+return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
       {/* {showExtraFilters && <Divider style={{marginBottom: 0, marginTop: '.5em'}} />} */}
@@ -256,14 +233,6 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
           <Label.Group columns={[...searchParams].length} className="doubling container">
             {!location.search.includes('saved') &&
             [...searchParams].map(([key, value]) => value && <Label key={key} basic color="blue"><strong>{titleCaseKey(key.replace(/_/ig,` `))}:</strong> {value} <Icon name="delete" onClick={() => { searchParams.delete(key); setSearchParams(searchParams) }} /></Label> ) }
-            {/* <Button basic floated='right' inverted color='teal' size='mini' content='Clear Saved' disabled={saved.length === 0} onClick={() => handleSave(null, true)} /> */}
-            {/* <Button basic floated='right' inverted color='teal' size='mini' icon='eye slash outline' content='Clear Hidden' disabled={hidden.length === 0} onClick={() => handleHide(null, true)} /> */}
-            {/* <Button basic floated='right' inverted color='teal' size='tiny' 
-              icon={searchParams.get('saved') ? 'list' : 'star outline'}
-              content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
-              disabled={saved.length === 0 && !searchParams.get('saved')} 
-              onClick={() => handleShowSaved(saved)}
-              /> */}
           </Label.Group>
         </div>
       </Form>
@@ -336,9 +305,10 @@ const cardStyle = { maxWidth: '525px' }
 const tagStyle = { color: 'dimgrey' }
 const detailsStyle = { marginTop: '.10em', padding: '.75em' }
 const blueCheckStyle = { color: 'grey', fontStyle: 'italic' }
+const socialLinkStyle = { display: 'flex' }
 
 const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, index}, ref) => {
-  const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified, cost_keywords } = listing
+  const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified, cost_keywords, tiktok_link } = listing
 
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
@@ -353,11 +323,15 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
     <div style={blueCheckStyle}><Icon name='check' color={cardColor} /> Verified by {name} on {date}</div>
   )
 
-  const SocialMediaDisplay = ({link, iconName}) => (
-    <Card.Description><Icon name={iconName} /><a target="_blank" rel="noreferrer" href={link}>{formatSocialMediaUrl(link)}</a></Card.Description> 
+  const SocialMediaDisplay = ({link, icon}) => (
+    <Card.Description><a target="_blank" rel="noreferrer" href={link}>
+      <Icon name={icon} /></a>
+    </Card.Description> 
   )
 
-  const KeywordDisplay = ({arr}) => arr.map((keyword, i) => <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> ) 
+  const KeywordDisplay = ({arr}) => arr.map((keyword, i) => (
+    <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> )
+  ) 
 
   return (
     <Ref innerRef={ref}>
@@ -382,13 +356,16 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
             { crisis_line_number && <Card.Description><Icon name="phone" />{crisis_line_label ?? 'Crisis Line'}: <a target="_blank" rel="noreferrer" href={`tel:${crisis_line_number}`}>{crisis_line_number}</a></Card.Description> }
             {/* Text message is a string and should not be hyperlinked */}
             { text_message_instructions && <Card.Description><Icon name="comment alternate" /> {text_message_instructions}</Card.Description> }
-            { website && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a></Card.Description> }
-            { blog_link && <Card.Description><Icon name="globe" /><a target="_blank" rel="noreferrer" href={blog_link}>{formatSocialMediaUrl(blog_link)}</a></Card.Description> }
-            { twitter_link && <Card.Description><Icon name="twitter" /><a target="_blank" rel="noreferrer" href={twitter_link}>{formatSocialMediaUrl(twitter_link)}</a></Card.Description> }
-            { facebook_link && <Card.Description><Icon name="facebook" /><a target="_blank" rel="noreferrer" href={facebook_link}>{formatSocialMediaUrl(facebook_link)}</a></Card.Description> }
-            { youtube_link && <Card.Description><Icon name="youtube" /><a target="_blank" rel="noreferrer" href={youtube_link}>{formatSocialMediaUrl(youtube_link)}</a></Card.Description> }
-            { instagram_link && <Card.Description><Icon name="instagram" /><a target="_blank" rel="noreferrer" href={instagram_link}>{formatSocialMediaUrl(instagram_link)}</a></Card.Description> }
             { program_email && <Card.Description><Icon name="mail outline" /><a target="_blank" rel="noreferrer" href={`mailto:${program_email}`}>{program_email}</a></Card.Description> }
+            <div id='social-links' style={socialLinkStyle}>
+              {website && <Card.Description style={{marginRight: '3%'}}><Icon name="globe" /><a target="_blank" rel="noreferrer" href={website}>Website</a>  </Card.Description> }
+              {instagram_link && <SocialMediaDisplay icon='instagram' link={instagram_link} /> }
+              {facebook_link && <SocialMediaDisplay icon='facebook' link={facebook_link} /> }
+              {twitter_link && <SocialMediaDisplay icon='twitter' link={twitter_link} /> }
+              {youtube_link && <SocialMediaDisplay icon='youtube' link={youtube_link} /> }
+              {/* We don't have a tiktok icon available atm. Todo (low priority): find one  */}
+              {/* {tiktok_link && <SocialMediaDisplay icon='' link={tiktok_link} /> } */}
+            </div>
           </Segment>
           {(agency_verified && date_agency_verified) && <BlueCheck name={full_name} date={date_agency_verified} />}
           {/* Description  */}
