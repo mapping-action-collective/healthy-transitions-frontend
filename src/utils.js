@@ -12,6 +12,7 @@ export const getCityCount = listings => {
       else cityCount[city] = 1
     }
   }
+  console.log('city count')
   return cityCount
 }
 
@@ -26,6 +27,7 @@ export const getKeywordCount = listings => {
       })
     }
   })
+  console.log('keyword count')
   return keywordCount
 }
 
@@ -42,6 +44,7 @@ export const getCostCount = listings => {
       })
     }
   })
+  console.log('cost count')
   return costCount
 }
 
@@ -90,7 +93,7 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
 
     if (tag) {
       // the Object.entries bit just means we're joining all the text fields before searching on them
-      let hasTag = tag && Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())
+      let hasTag = Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase())
       if (!hasTag) return false
     }
 

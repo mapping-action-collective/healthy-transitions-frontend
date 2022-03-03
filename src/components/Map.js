@@ -49,7 +49,7 @@ function MapPage({ listings, listingMetadata }) {
     } 
   }
 
-  const { listingCategoryIcons, listingCategories } = listingMetadata
+  const { listingCategoryIcons, listingCategories, listingCities: defaultListingCities, listingKeywords: defaultListingKeywords } = listingMetadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
@@ -57,8 +57,9 @@ function MapPage({ listings, listingMetadata }) {
   
   // If you don't want to recalculate the two lines below on every search, just use listingMetadata.listingCities and listingMetadata.listingKeywords, respectively
   // This is faster, but also a less rich user experience
-  let listingCities = useMemo(() => getCityCount(filteredListings ?? {}), [filteredListings])
-  const keywordCount = useMemo(() => getKeywordCount(filteredListings ?? {}), [filteredListings])
+  let listingCities = useMemo(() => searchParams.get('city') ? defaultListingCities : getCityCount(filteredListings ?? {}), [filteredListings])
+  const keywordCount = useMemo(() => searchParams.get('tag') ? defaultListingKeywords: getKeywordCount(filteredListings ?? {}), [filteredListings])
+  // TODO: add a default cost count to the API so that we have a default here
   const costCount = useMemo(() => getCostCount(filteredListings ?? {}), [filteredListings])
   
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
