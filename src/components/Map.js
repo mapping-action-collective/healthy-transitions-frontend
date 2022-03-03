@@ -79,7 +79,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
-  const [showSearchFilters, setShowSearchFilters] = useState(false)
+  const [showSearchFilters, setShowSearchFilters] = useState(true)
 
   // When user clears the params, this clears the input value as well
   useEffect(() => {
@@ -185,7 +185,7 @@ return (<>
             onChange={(e, {value}) => handleAge(value)} />
           </Grid.Column>
       {/* Location Dropdown  */}
-      {locationDropdown && 
+      {/* {locationDropdown && 
         <Grid.Column>
           <Dropdown placeholder='Location' search id="location-input"
             fluid 
@@ -202,11 +202,11 @@ return (<>
             style={{zIndex: 2}}
             action={{icon: 'search'}}
           />
-          </Grid.Column>}
+          </Grid.Column>} */}
         {/* Keyword Dropdown  */}
         {keywords && 
         <Grid.Column>
-          <Dropdown placeholder='Population' search fluid id="population-input"
+          <Dropdown placeholder='Population' search fluid         id="population-input"
             button className='icon' icon='user' labeled inverted
             options={keywordDropdownOptions} 
             value={searchParams.get('tag') || ``} 
@@ -216,6 +216,19 @@ return (<>
             style={{zIndex: 2}}
           />
           </Grid.Column>}
+          <Grid.Column>
+          {keywords && 
+          <Dropdown id='population-input-2'
+            options={keywordDropdownOptions} 
+            search selection clearable
+            labeled 
+            placeholder='Population'
+            selectOnBlur={false}
+            inverted fluid 
+            value={searchParams.get('tag') || ``} 
+            onChange={(e, {value}) => handleKeyword(e.type, value)}
+          />}
+          </Grid.Column>
         {/* COST DROPDOWN  */}
         {cost && 
         <Grid.Column>
@@ -380,7 +393,6 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
             { intake_instructions && <Card.Description><Card.Header as="strong">Next Steps:</Card.Header> {intake_instructions.includes(`\n`) ? intake_instructions.split('\n').map((paragraph, index) => index === 0 ? paragraph : <p key={index}>{paragraph}</p>) : intake_instructions}</Card.Description>}
             {/* Languages is an array  */}
             { languages_offered && <Card.Description><Card.Header as="strong">Languages: </Card.Header>{languages_offered.join(", ")}</Card.Description> }
-            {/* { services_provided && <ValueList name="Services" values={services_provided} /> } */}
           </Segment>
           { (min_age && max_age) ? <Card.Description><Card.Header as="strong">Ages:</Card.Header> {min_age}-{max_age}</Card.Description>
             : (min_age && !max_age) ? <Card.Description><Card.Header as="strong">Minimum age served:</Card.Header> {min_age}</Card.Description>
@@ -405,13 +417,6 @@ const ExpandableDescription = ({ label, value }) => <>
     { label && <Card.Header as="strong">{label}:</Card.Header> }
     { value && <Card.Description className="expandable" tabIndex="0">{value.split(`\n`).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</Card.Description> }
 </>
-
-const ValueList = ({ name, values }) => values && (
-  <List horizontal as="dl" className="value-list">
-    <List.Item key={name} as="dt">{ name }</List.Item>
-    { values.map(dd => <List.Item key={dd} as="dd">{dd}</List.Item>) }
-  </List>
-)
 
 const MapMap = forwardRef(({ listings, cardRefs }, ref) => {
   return (

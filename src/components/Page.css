@@ -45,4 +45,20 @@ html, body { overflow: hidden; }
   color: white;
 }
 
+
+
+
+#population-input-2 {
+  background-color: black;
+  font-weight: bold;
+  border: 2.75px dimgrey solid;
+  font-size: 1.05em;
+  color: white;
+}
+
+/* TODO: get this working, and ideally add an icon in the placeholder area  */
+#population-input-2::placeholder {
+  color: #FAF9F6;
+}
+
 /* Semantic Grey: F3F4F5 */
