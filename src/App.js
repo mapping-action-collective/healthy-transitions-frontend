@@ -22,6 +22,7 @@ function App({listings, listingMetadata, staticText}) {
           {aboutText && <Route path="/about" element={<About aboutText={aboutText} contributors={contributors} />} />}
           {resources && <Route path="/resources" element={<Resources resources={resources} />} />}
           <Route path="/suggest" element={<SuggestUpdate />} />
+          <Route path="/suggest/:listingId" element={<SuggestUpdate />} />
           <Route path="/" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
           <Route path=":markerId" element={<Map listings={listings} listingMetadata={listingMetadata} />} />
         </Routes>

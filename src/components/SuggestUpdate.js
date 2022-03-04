@@ -1,5 +1,6 @@
 import React from 'react'
-import { Container, Header, Menu, Tab } from 'semantic-ui-react'
+import { useParams, useSearchParams } from 'react-router-dom'
+import { Container, Header, Menu, Tab, Segment } from 'semantic-ui-react'
 
 import './SuggestUpdate.css'
 
@@ -17,8 +18,14 @@ const FORMS = [
 ]
 
 function SuggestUpdate () {
+  const { listingId } = useParams()
+  const [searchParams, ] = useSearchParams()
+  const name = searchParams.get('name') ?? ''
   return (
     <Container as="main" id="suggest-update-page">
+      <Segment style={{ marginTop: '1em', fontWeight: 'bold', textAlign: 'center'}}>
+        {listingId && <div>You clicked on listing #{listingId} {name && ` : ${name}`} </div>}
+      </Segment>
       <Tab className="embed" menu={{ secondary: true, pointing: true, }} panes={FORMS.map(({ name, description, url }) => ({
         menuItem: <Menu.Item key={name} as={Header}>{name}</Menu.Item>,
         render: () => <Tab.Pane content={<iframe title={description} src={url} frameBorder="0" marginHeight="0" marginWidth="0" />} />,
