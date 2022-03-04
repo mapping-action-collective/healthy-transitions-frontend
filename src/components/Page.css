@@ -48,17 +48,24 @@ html, body { overflow: hidden; }
 
 
 
-#population-input-2 {
+#keyword-input {
   background-color: black;
   font-weight: bold;
   border: 2.75px dimgrey solid;
   font-size: 1.05em;
   color: white;
+  display: flex;
+  flex-direction: row;
+  z-index: 2;
 }
 
-/* TODO: get this working, and ideally add an icon in the placeholder area  */
-#population-input-2::placeholder {
-  color: #FAF9F6;
+#keyword-input #keyword-icon {
+  justify-self: flex-start;
+  margin-right: 15px;
+}
+
+#keyword-input i.dropdown.icon.clear::before {
+  font-size: 1.25em;
 }
 
 /* Semantic Grey: F3F4F5 */

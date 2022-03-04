@@ -112,13 +112,32 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   // Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
   const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
 
-  const handleCity = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), city: value }) }
+  const handleCity = (eventType, value) => { 
+    if (eventType === 'click') {
+      if (value === '') {
+        searchParams.delete('city'); setSearchParams(searchParams)
+      }
+      else setSearchParams({ ...Object.fromEntries(searchParams), city: value }) 
+    }
+  }
 
-  // const logEvent = (event, value) => console.log(event)
+  const handleKeyword = (eventType, value) => { 
+    if (eventType === 'click') {
+      if (value === '') {
+        searchParams.delete('tag'); setSearchParams(searchParams)
+      }
+      else setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) 
+    }
+  }
 
-  const handleKeyword = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) }
-
-  const handleCost = (eventType, value) => { if (eventType === 'click') setSearchParams({ ...Object.fromEntries(searchParams), cost: value }) } 
+  const handleCost= (eventType, value) => { 
+    if (eventType === 'click') {
+      if (value === '') {
+        searchParams.delete('cost'); setSearchParams(searchParams)
+      }
+      else setSearchParams({ ...Object.fromEntries(searchParams), cost: value }) 
+    }
+  }
 
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
@@ -175,71 +194,56 @@ return (<>
       {/* Optional Filters  */}
       {showSearchFilters &&
       <Grid stackable columns='equal' style={{marginBottom: '.25em', marginTop: 0}}>
-        {/* Age Input  */}
-        <Grid.Column width={2}>
-          <Input type="number" id='age-input' fluid
-            placeholder='Age'
-            value={age}
-            // TODO: clear search params if they include "saved." Otherwise, UX gets wonky.
-            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleAge(value)} />
-          </Grid.Column>
+      {/* Age Input  */}
+      <Grid.Column width={2}>
+        <Input type="number" id='age-input' fluid
+          placeholder='Age'
+          value={age}
+          // TODO: clear search params if they include "saved." Otherwise, UX gets wonky.
+          onFocus={() => navigate(`/?${searchParams.toString()}`)} 
+          onChange={(e, {value}) => handleAge(value)} />
+      </Grid.Column>
       {/* Location Dropdown  */}
-      {/* {locationDropdown && 
+      {locationDropdown && 
         <Grid.Column>
-          <Dropdown placeholder='Location' search id="location-input"
-            fluid 
-            button
-            className='icon'
-            labeled
-            label='Location'
-            icon='map marker alternate'
+          <Dropdown id="keyword-input"
             options={locationDropdownOptions} 
+            search selection clearable 
+            button 
+            placeholder={<div><i className="ui icon map marker alternate" id="keyword-icon"></i><span id="keyword-label">  Location</span></div>}
+            selectOnBlur={false}  
+            inverted fluid
             value={searchParams.get('city') || ``} 
-            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleCity(e.type, value)}
-            // onChange={(e, {value}) =>logEvent(e, value)}
-            style={{zIndex: 2}}
-            action={{icon: 'search'}}
           />
-          </Grid.Column>} */}
+          </Grid.Column>}
         {/* Keyword Dropdown  */}
         {keywords && 
         <Grid.Column>
-          <Dropdown placeholder='Population' search fluid         id="population-input"
-            button className='icon' icon='user' labeled inverted
+          <Dropdown id='keyword-input'
             options={keywordDropdownOptions} 
-            value={searchParams.get('tag') || ``} 
-            // Todo: Do I need this onFocus here? Investigate
-            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
-            onChange={(e, {value}) => handleKeyword(e.type, value)}
-            style={{zIndex: 2}}
-          />
-          </Grid.Column>}
-          <Grid.Column>
-          {keywords && 
-          <Dropdown id='population-input-2'
-            options={keywordDropdownOptions} 
-            search selection clearable
-            labeled 
-            placeholder='Population'
+            search selection clearable 
+            button
+            placeholder={<div><i className="ui icon user" id="keyword-icon"></i><span id="keyword-label">  Population</span></div>}
             selectOnBlur={false}
             inverted fluid 
             value={searchParams.get('tag') || ``} 
             onChange={(e, {value}) => handleKeyword(e.type, value)}
-          />}
-          </Grid.Column>
+          />
+        </Grid.Column>}
         {/* COST DROPDOWN  */}
         {cost && 
         <Grid.Column>
-          <Dropdown placeholder='Cost' search fluid id="population-input"
-            button className='icon' icon='dollar sign' labeled inverted
+          <Dropdown id='keyword-input'
             options={costDropdownOptions} 
+            search selection clearable 
+            button
+            placeholder={<div><i className="ui icon dollar sign" id="keyword-icon"></i><span id="keyword-label">  Cost</span></div>}
+            selectOnBlur={false}
+            inverted fluid 
             value={searchParams.get('cost') || ``} 
-            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleCost(e.type,value)}
-            style={{zIndex: 2}}
-          />
+            />
           </Grid.Column>}
         </Grid>}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '.25em'}}>
