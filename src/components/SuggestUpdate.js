@@ -6,7 +6,7 @@ import './SuggestUpdate.css'
 const FORMS = [
   {
     "name": "General Feedback",
-    "url": "https://docs.google.com/forms/d/e/1FAIpQLSfa0GQ4AYpNTwU3_d1y0cnYfGDE_fVqw_dctqBrt_TIrymxLA/viewform?embedded=true",
+    "url": "https://airtable.com/embed/shrf6rYC2BIZDA9rm?backgroundColor=red",
     "description": "Give feedback on the site, comment on a specific listing, or report a bug."
   },
   {
