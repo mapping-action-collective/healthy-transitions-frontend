@@ -1,90 +1,120 @@
-// TODO: see if there's a clearer/shorter way to rewrite this. possibly don't hard code it
-// Sorts listings and puts all listings containing a "Youth Services" keyword first. Returns mutated copy of same object.
-function sortListings(listings, keyword1, keyword2) {
-  let sortedListings = listings.sort((listing1, listing2) => {
-    // ------- privilege listings with an address (3rd priority)
-    if (listing1.full_address && !listing2.full_address) {
-      return -1
-    }
-    if (!listing1.full_address && listing2.full_address) {
-      return 1
-    }
-    return 0
-  })
-  
-  // Sort is stable, so each sort function will preserve the previous sort order, and sort within that
-  // ----- Sort by keyword2 (2nd priority)
-  if (keyword2) {
-    sortedListings = sortedListings.sort((listing1, listing2) => {
-      if (listing1.keywords?.includes(keyword2) && !listing2.keywords?.includes(keyword2)) {
-        return -1
-      }
-      if (!listing1.keywords?.includes(keyword2) && listing2.keywords?.includes(keyword2)) {
-        return 1
-      }
-      return 0
-    })
-  }
 
-  // Privilege listings in Eugene for now
-  // TODO: set this to the user's location if possible
-  sortedListings = sortedListings.sort((listing1, listing2) => {
-    if (listing1.full_address?.includes('Eugene') && !listing2.full_address?.includes('Eugene')) {
-      return -1
-    }
-    if (!listing1.full_address?.includes('Eugene') && listing2.full_address?.includes('Eugene')) {
-      return 1
-    }
-    return 0
-  })
+export const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
-  // ---- sort by keyword1 (1st priority)
-  if (keyword1) {
-    sortedListings = sortedListings.sort((listing1, listing2) => {
-      if (listing1.keywords?.includes(keyword1) && !listing2.keywords?.includes(keyword1)) {
-        return -1
-      }
-      if (!listing1.keywords?.includes(keyword1) && listing2.keywords?.includes(keyword2)) {
-        return 1
-      }
-      return 0
-    })
+// for loops are faster, and speed matters here as this calculation runs on every onChange handler in the UI 
+// TODO: memoize this. It's running way too often.
+export const getCityCount = listings => {
+  let cityCount = {}
+  for (let i = 0; i < listings.length; i++) {
+    if (listings[i].city) {
+      let city = listings[i].city
+      if (cityCount[city]) cityCount[city] ++
+      else cityCount[city] = 1
+    }
   }
-  
-  return sortedListings
+  console.log('city count')
+  return cityCount
 }
 
-// Unused, but may be helpful in the future
-// function prioritizeListings(listings) {
-//   listings.sortPriority = 0
-//   listings.hasYouthServices = 0
-//   if (listings.full_address) listings.sortPriority ++
-//   if (listings.keywords.length > 2) listings.sortPriority ++
-//   if (listings.keywords.includes('Youth Services')) listings.hasYouthServices ++
-// }
+// Can be fetched from API, or recalculated on search
+export const getKeywordCount = listings => {
+  let keywordCount = {}
+  listings.forEach((listing) => {
+    if (listing.keywords) {
+      listing.keywords.forEach((keyword) => {
+        if (!keywordCount[`${keyword}`]) keywordCount[`${keyword}`] = 1
+        else keywordCount[`${keyword}`] ++
+      })
+    }
+  })
+  console.log('keyword count')
+  return keywordCount
+}
+
+export const costKeywords = ['OHP', 'Private Insurance', 'Financial Aid Available', 'Free', 'Accepts Uninsured', 'Sliding Scale', 'Low Cost', 'Medicare / Medicaid']
+
+// TODO: refactor to use for loop (faster)
+export const getCostCount = listings => {
+  let costCount = {}
+  listings.forEach((listing) => {
+    if (listing.cost_keywords) {
+      listing.cost_keywords.forEach((keyword) => {
+        if (!costCount[`${keyword}`]) costCount[`${keyword}`] = 1
+        else costCount[`${keyword}`] ++
+      })
+    }
+  })
+  console.log('cost count')
+  return costCount
+}
+
+export const getCategoryCount = (listings) => {
+  let listingCategories = {}
+  listings.forEach((listing) => {
+    const [ parentCategory, subCategory ] = listing.category.split(`: `)
+    if (!listingCategories[`${parentCategory}`]) listingCategories[`${parentCategory}`] = {}
+    if (!listingCategories[`${parentCategory}`][`${subCategory}`]) listingCategories[`${parentCategory}`][`${subCategory}`] = 1
+    else listingCategories[`${parentCategory}`][`${subCategory}`] ++
+  })
+  return listingCategories
+}
+
+export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
+
+export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
+
+const cost = ["Low Cost", "Free", "OHP", "Accepts Uninsured", "Sliding Scale", "Financial Aid Available"]
 
 // this function accepts json listings and returns them, formatted for leaflet use
 export function formatListings(listings) {
+  // patch. TODO: fix on the BE and remove
+  listings = listings.map(listing => {
+    if (listing.cost_keywords && listing.cost_keywords?.length > 0) {
+      listing.cost = listing.cost_keywords
+    }
+    return listing
+  })
+  console.log(listings)
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
+// This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
+export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
+  // if URL includes the "saved" param, display saved listings ONLY
+  if (searchParams.get('saved')) {
+    let savedGuids = searchParams.getAll('saved')
+    return listings.filter(listing => savedGuids.includes(listing.guid.toString()))
+  }
 
-// this function accepts listings, and filters according to a search string
-// the Object.entries bit just means we're joining all the text fields before searching on them
-// update 12.28.21 - added optional tag argument. it runs a text search, using the same logic as "search" 
-export function filterListings(listings = {}, searchParams, search = "") {
-  const { age, tag, ...filters } = Object.fromEntries(searchParams)
-  sortListings(listings, 'Youth Services', 'BIPOC Services')
-  let filteredListings = listings
+  const { age, tag, ...filters } = Object.fromEntries(searchParams) 
+  const searchFunction = (listing) => {
+    const isHidden = (hidden.includes(listing.guid)) 
+    if (isHidden) return false
 
-  // tag is optional. it should perform a text search
-  if (tag) filteredListings = filteredListings.filter(listing => Object.entries(listing).join(" ").toLowerCase().match(tag.toLowerCase()))
-  // Search term
-  filteredListings = filteredListings.filter(listing => Object.entries(listing).join(" ").toLowerCase().match(search.toLowerCase()))
+    const listingEntries = Object.entries(listing).join(" ").toLowerCase()
 
-  filteredListings = filteredListings.filter(listing => Object.entries(filters).every(([ key, value ]) => Array.isArray(listing[key]) ? listing[key].includes(value) : listing[key] === value))
+    if (tag) {
+      // the Object.entries bit just means we're joining all the text fields before searching on them
+      let hasTag = listingEntries.includes(tag.toLowerCase())
+      if (!hasTag) return false
+    }
 
-  filteredListings = filteredListings.filter(({ min_age, max_age }) => !age || ((!max_age || age <= max_age) && (!min_age || age >= min_age)))
+    if (search) {
+      let hasSearchTerm = listingEntries.includes(search.toLowerCase())
+      if (!hasSearchTerm) return false
+    }
+
+    if (filters) {
+      let hasFilters = Object.entries(filters).every(([ key, value ]) => Array.isArray(listing[key]) ? listing[key].includes(value) : listing[key] === value)
+      if (!hasFilters) return false
+    }
+
+    if (age) {
+      let isCorrectAge = !age || ((!listing.max_age || age <= listing.max_age) && (!listing.min_age || age >= listing.min_age))
+      if (!isCorrectAge) return false
+    }
+    return true
+  }
   
-  return filteredListings
+  return listings.filter(searchFunction)
 }

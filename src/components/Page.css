@@ -1,10 +1,71 @@
 html, body { overflow: hidden; }
 #app { height: 100vh; display: flex; flex-flow: column nowrap; scroll-padding-top: 72px; overflow-y: auto; scroll-behavior: smooth; scroll-snap-type: y proximity; }
 
-#app > header { position: sticky; top: 0px; z-index: 2; padding: 0; background-color: #292e36; }
+#app > header { position: sticky; top: 0px; z-index: 3; padding: 0; background-color: #292e36; }
 #app > header > nav.menu { font-family: 'Yanone Kaffeesatz', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
 #app > header > nav.menu > .item { padding: 2px 0.25em 0; font-size: larger; line-height: 2.5; color: white; }
+
+#app > footer { position: sticky; bottom: 0px; z-index: 2; padding: 0; 
+  background-color: #F3F4F5; 
+  border-radius: 0; color: 'dimgrey';
+}
+
+#app > footer > p { color: 'grey'; }
 
 #app > main { flex: 1 1 auto; }
 
 .mac-logo { text-transform: uppercase !important; white-space: pre; color: white !important; opacity: 0.75; }
+
+#age-input::placeholder {
+  color: #FAF9F6;
+}
+
+#age-input {
+  /* background-color: #E0E1E2; */
+  background-color: black;
+  font-weight: bold;
+  border: 2.75px dimgrey solid;
+  font-size: 1.05em;
+  color: white;
+}
+
+#location-input {
+  background-color: black;
+  font-weight: bold;
+  border: 2.75px dimgrey solid;
+  font-size: 1.05em;
+  color: white;
+}
+
+#population-input {
+  background-color: black;
+  font-weight: bold;
+  border: 2.75px dimgrey solid;
+  font-size: 1.05em;
+  color: white;
+}
+
+
+
+
+#keyword-input {
+  background-color: black;
+  font-weight: bold;
+  border: 2.75px dimgrey solid;
+  font-size: 1.05em;
+  color: white;
+  display: flex;
+  flex-direction: row;
+  z-index: 2;
+}
+
+#keyword-input #keyword-icon {
+  justify-self: flex-start;
+  margin-right: 15px;
+}
+
+#keyword-input i.dropdown.icon.clear::before {
+  font-size: 1.25em;
+}
+
+/* Semantic Grey: F3F4F5 */
