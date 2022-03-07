@@ -14,15 +14,12 @@ function Page({disclaimer, aboutText, resources, children}) {
       <Menu as="nav" size="massive" color="teal" secondary pointing className="container">
         <Menu.Item as={NavLink} to="/" end className="mac-logo">Mapping Action Collective</Menu.Item>
         <Menu.Item as={NavLink} to="/" end>Oregon Youth Resource Map</Menu.Item>
-        {resources && <Menu.Item as={NavLink} to="/resources" position="right"><header>Resources</header></Menu.Item>}
-        {aboutText && <Menu.Item as={NavLink} to="/about"><header>About</header></Menu.Item>}
+        {aboutText && <Menu.Item as={NavLink} to="/about" position="right"><header>About</header></Menu.Item>}
+        {resources && <Menu.Item as={NavLink} to="/resources"><header>More Resources</header></Menu.Item>}
         <Menu.Item as={NavLink} to="/suggest"><header>Suggest Update</header></Menu.Item>
       </Menu>
     </Segment>
     {children}
-    <Segment as="footer" basic vertical>
-      {/* <p>{disclaimer}</p> */}
-    </Segment>
   </>)
 }
 
