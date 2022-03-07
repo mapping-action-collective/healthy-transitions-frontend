@@ -5,8 +5,8 @@ import { Menu, Segment } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 import './Page.css'
 
-function Page({disclaimer, aboutText, resources, children}) {
-  // Note: commented out because these are throwing errors I don't have time to look into
+function Page({aboutText, resources, children}) {
+  // Note: For Google analytics. Lines 10 & 11 comment out because these are throwing errors I don't have time to investigate 
   // let location = useLocation();
   // useEffect(() => window.gtag('event', 'page_view', { 'page_location': window.location, 'page_path': location.pathname + location.hash }) || console.log(location), [location])
   return (<>
