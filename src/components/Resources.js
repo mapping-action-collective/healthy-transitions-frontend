@@ -6,7 +6,6 @@ import './About.css'
 const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
 
 function Resources({resources}) {
-  console.log(resources)
   return (
     <Container as="main" id="about-page" text style={{marginBottom: '3em'}}>
       <Segment as="article" basic vertical>
