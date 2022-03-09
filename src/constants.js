@@ -9,7 +9,7 @@ export const CONTENT = {
     {
       "name": "General Feedback",
       // EDIT HERE if you want to change the link to the GENERAL FEEDBACK form, delete and replace the url below.
-      "url": "https://airtable.com/embed/shrf6rYC2BIZDA9rm?backgroundColor=red",
+      "url": "https://docs.google.com/forms/d/e/1FAIpQLSeXlEZx3j4sVZDvcvghQnUYrnUCB_WXkd5EVruzENYA_rsZjg/viewform?embedded=true",
       "description": "Give feedback on the site, comment on a specific listing, or report a bug."
     },
     {
