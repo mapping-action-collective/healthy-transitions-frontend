@@ -25,7 +25,6 @@ function AboutPage({aboutText, contributors, disclaimer, videoLink, rubric}) {
         {/* DO NOT REMOVE. Required by White Bird TOS. */}
         {whiteBirdAttribution}
         {/* TODO: add segment or similar to display rubric text here */}
-        {/* {dsLogoDisplay} */}
         </Segment>
         {/* List of contributors/sponsors, including MAC */}
         {contributors &&<Segment as="article" vertical>

@@ -1,5 +1,5 @@
 export const CONTENT = {
-  "ABOUT_TEXT": "The Oregon Youth Resource Map is a collaboration between Healthy Transitions Youth Leadership, youth councils around the state, Direction Service in Eugene, and the Mapping Action Collective in Portland, Oregon. \n\nThe Resource Map centers youth needs and voices. It focuses on programs, services and leadership opportunities for youth and young adults, ages 16-25 in Oregon, including services for health and mental healthcare, housing, education, and more. The Map began as a way to connect youth with mental health services, and has expanded to include anything that may improve quality of life for youth and young adults. \n\nThe Oregon Youth Resource Map is funded and contributed to by SAMHSA (Substance Abuse and Mental Health Service Administration), the Oregon Health Authority, Portland State University, Youth ERA, and local service providers from Douglas and Lane Counties.",
+  "ABOUT_TEXT": "The Oregon Youth Resource Map is designed to help young people ages 16-25 and their allies connect to youth-serving resources, organizations and leadership opportunities. The map centers youth needs and voices, and includes services for health and mental healthcare, housing, education, and more. The Map began as a way to connect youth with mental health services, and has expanded to cover resources connected to health and wellness for youth and young adults. \n This tool was developed by young people with lived experience in mental health services/systems in our state. These young leaders convened as part of Healthy Transitions Oregon, a federal grant working to improve services for transition-age youth with significant mental health challenges. More about Healthy Transitions can be found here: https://www.samhsa.gov/grants/grant-announcements/sm-18-010.",
   "DISCLAIMER": "Please contact providers ahead of time, as hours and services may change due to COVID. This map is not updated in real time.",
   "FOOTER_DISCLAIMER": "Please contact providers ahead of time, as hours and services may change due to COVID. This map is not updated in real time.",
   "VIDEO_TUTORIAL_LINK": null,
@@ -23,6 +23,7 @@ export const CONTENT = {
     {
       "name": "Direction Service",
       "logo": "https://i.postimg.cc/zG6Wxkk7/DS-Logo-Web.jpg",
+      "website_url": "https://www.directionservice.org/youth-family-services",
       "description": "Direction Service provides support for disabled children, youth, young adults, and their families in Eugene, Oregon. Direction Service worked closely with Healthy Transitions youth to make the map what it is today."
     },
     {
@@ -35,21 +36,6 @@ export const CONTENT = {
       "logo": "https://i.postimg.cc/9M28z2Kv/mac-logo.png",
       "website_url": "https://mappingaction.org/",
       "description": "The Mapping Action Collective (MAC) uses mapping, data, and technology to support their community and beyond. MAC wrote the code and organized the database that powers the Oregon Youth Resource Map."
-    },
-    {
-      "name": "Substance Abuse and Mental Health Services Administration (SAMHSA)",
-      "description": "The Healthy Transitions SAMHSA Grant funds projects that increase access to mental health support for youth ages 16-25 in Oregon. The Oregon Youth Resource Map is initially funded by SAMHSA in partnership with PSU, OHA, and and Direction Service."
-    },
-    {
-      "name": "Portland State University School of Social Work"
-    },
-    {
-      "name": "Oregon Health Authority"
-    },
-    {
-      "name": "White Bird Community Services",
-      // "logo": "https://i.postimg.cc/ydfGsq9Z/white-Bird-Logo.png",
-      "description": "White Bird maintains the Little Help Book, a mental health resource guide which they generously shared with the Oregon Youth Resource Map."
     }
   ],
   // Edit resource links & descriptions here
