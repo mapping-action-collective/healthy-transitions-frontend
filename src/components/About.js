@@ -24,8 +24,7 @@ function AboutPage({aboutText, contributors, disclaimer, videoLink, rubric}) {
         <div>{aboutText.split('\n').map((paragraph, i) => <p key={i}>{paragraph}</p>)}</div>
         {/* DO NOT REMOVE. Required by White Bird TOS. */}
         {whiteBirdAttribution}
-        {/* TODO: add segment or similar to display rubric text here */}
-        {/* {dsLogoDisplay} */}
+        {rubric && <div>{rubric.split('\n').map((paragraph, i) => <p key={i}>{paragraph}</p>)}</div>}
         </Segment>
         {/* List of contributors/sponsors, including MAC */}
         {contributors &&<Segment as="article" vertical>
