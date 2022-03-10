@@ -22,17 +22,17 @@ export const CONTENT = {
   "CONTRIBUTORS": [
     {
       "name": "Direction Service",
-      "logo_url": "https://i.postimg.cc/zG6Wxkk7/DS-Logo-Web.jpg",
+      "logo": "https://i.postimg.cc/zG6Wxkk7/DS-Logo-Web.jpg",
       "description": "Direction Service provides support for disabled children, youth, young adults, and their families in Eugene, Oregon. Direction Service worked closely with Healthy Transitions youth to make the map what it is today."
     },
     {
       "name": "Healthy Transitions Transition Age Youth (TAY)",
-      "logo_url": "https://i.postimg.cc/bNhrmBb3/healthy-transitions-logo-2020.png",
+      "logo": "https://i.postimg.cc/bNhrmBb3/healthy-transitions-logo-2020.png",
       "description": "The idea for the Oregon Youth Resource Map was created by youth, for youth. The Map was first proposed in Youth and Young Adult Voices Comittees, which meet across the state of Oregon. The Healthy Transitions TAY team continues to guide and direct development of the Map."
     },
     {
       "name": "Mapping Action Collective",
-      "logo_url": "https://i.postimg.cc/9M28z2Kv/mac-logo.png",
+      "logo": "https://i.postimg.cc/9M28z2Kv/mac-logo.png",
       "website_url": "https://mappingaction.org/",
       "description": "The Mapping Action Collective (MAC) uses mapping, data, and technology to support their community and beyond. MAC wrote the code and organized the database that powers the Oregon Youth Resource Map."
     },
@@ -48,12 +48,8 @@ export const CONTENT = {
     },
     {
       "name": "White Bird Community Services",
-      "logo_url": "https://i.postimg.cc/ydfGsq9Z/white-Bird-Logo.png",
+      // "logo": "https://i.postimg.cc/ydfGsq9Z/white-Bird-Logo.png",
       "description": "White Bird maintains the Little Help Book, a mental health resource guide which they generously shared with the Oregon Youth Resource Map."
-    },
-    {
-      "name": "Street Roots",
-      "description": "Street Roots works with and for the houseless community in Portland, Oregon. We thank them for sharing data from their resource guide for houseless Portanders, the Rose City Resource Guide."
     }
   ],
   // Edit resource links & descriptions here
