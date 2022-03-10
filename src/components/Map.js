@@ -165,7 +165,6 @@ return (<>
             icon='search'
             iconPosition="left"
             placeholder="Search..." 
-            // action={{icon: "search"}} 
             onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => debouncedSearch(value)} 
           />
@@ -185,7 +184,6 @@ return (<>
         <Input type="number" id='age-input' fluid
           placeholder='Age'
           value={age}
-          // TODO: clear search params if they include "saved." Otherwise, UX gets wonky.
           onFocus={() => navigate(`/?${searchParams.toString()}`)} 
           onChange={(e, {value}) => handleAge(value)} />
       </Grid.Column>
@@ -200,6 +198,7 @@ return (<>
             selectOnBlur={false}  
             inverted fluid
             value={searchParams.get('city') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleDropdownClick(e.type, value, 'city')}
           />
           </Grid.Column>}
@@ -214,6 +213,7 @@ return (<>
             selectOnBlur={false}
             inverted fluid 
             value={searchParams.get('tag') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleDropdownClick(e.type, value, 'tag')}
           />
         </Grid.Column>}
@@ -228,6 +228,7 @@ return (<>
             selectOnBlur={false}
             inverted fluid 
             value={searchParams.get('cost') || ``} 
+            onFocus={() => navigate(`/?${searchParams.toString()}`)} 
             onChange={(e, {value}) => handleDropdownClick(e.type, value, 'cost')}
             />
           </Grid.Column>}
