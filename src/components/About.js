@@ -12,8 +12,6 @@ const greyText = {color: "dimgrey"}
 // TODO: get code for displaying the yt video link
 function AboutPage({aboutText, contributors, disclaimer, videoLink, rubric}) {
 
-  const dsLogoDisplay = (<figure><figcaption style={{fontWeight: "bold"}}>Made possible by collaboration with Direction Service in Eugene, Oregon</figcaption><Image src={DirectionServiceLogo} /></figure>)
-
   const whiteBirdAttribution = (<Item style={whiteBirdStyle}><Item.Image size='tiny' src={whiteBirdLogo} /><Item.Content style={{alignSelf: "center"}}>Some data was sourced from The Little Help Book published by White Bird Clinic.</Item.Content></Item>)
 
   const genLogoStyle = { maxWidth: '125px', maxHeight: '75px', marginRight: '1.5em'}

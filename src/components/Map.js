@@ -38,12 +38,12 @@ function MapPage({ listings, listingMetadata }) {
   // "saved" is an array of saved card guids
   const handleShowSaved = () => {
     // If saved is already showing, clear the url bar
-    if (showSaved || searchParams.get('saved')) {
-      setShowSaved(!showSaved)
+    if (searchParams.get('saved')) {
+      setShowSaved(false)
       navigate({ pathname: '/', search: ''})
     } else if (saved.length > 0) {
       // set state so that the UI components can update
-      setShowSaved(!showSaved)
+      setShowSaved(true)
       const paramsString = saved.join("&saved=")
       navigate({ pathname: '/', search: `?saved=${paramsString}` })
     } 
@@ -79,7 +79,7 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const [ age, setAge ] = useState(searchParams.get('age') || ``)
-  const [showSearchFilters, setShowSearchFilters] = useState(true)
+  const [showFilters, setShowFilters] = useState(true)
 
   // When user clears the params, this clears the input value as well
   useEffect(() => {
@@ -110,34 +110,20 @@ function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, l
 
   // Set the UI state quickly for better UX, but debounce the actual search logic.
   // Note: the "min" and "max" fields on our number input aren't working. Probably a Semantic bug. Implemented manually here.
-  const handleAge = value => { if (value >= 0 && value <100) { setAge(value); debouncedAge(value); }}
+  const handleAge = value => { if (value >= 0 && value <100) { clearSaved(); setAge(value); debouncedAge(value); }}
 
-  const handleCity = (eventType, value) => { 
+  const handleDropdownClick = (eventType, value, key) => {
+    clearSaved()
     if (eventType === 'click') {
       if (value === '') {
-        searchParams.delete('city'); setSearchParams(searchParams)
+        searchParams.delete(key); setSearchParams(searchParams)
       }
-      else setSearchParams({ ...Object.fromEntries(searchParams), city: value }) 
+      else setSearchParams({ ...Object.fromEntries(searchParams), [key]: value }) 
     }
-  }
+  } 
 
-  const handleKeyword = (eventType, value) => { 
-    if (eventType === 'click') {
-      if (value === '') {
-        searchParams.delete('tag'); setSearchParams(searchParams)
-      }
-      else setSearchParams({ ...Object.fromEntries(searchParams), tag: value }) 
-    }
-  }
-
-  const handleCost= (eventType, value) => { 
-    if (eventType === 'click') {
-      if (value === '') {
-        searchParams.delete('cost'); setSearchParams(searchParams)
-      }
-      else setSearchParams({ ...Object.fromEntries(searchParams), cost: value }) 
-    }
-  }
+  // If a user is viewing "saved" listings, and clicks on a different UI element (search, filters, etc) we need to clear the "saved" params from the URL bar before doign anything else, to prevent bugs
+  const clearSaved = () => { searchParams.delete('saved') }
 
   // This data comes from the API. It's optional, so null check it 
   const locationDropdownOptions = Object.entries(listingCities ?? {}).map(([cityName, count]) => {
@@ -161,7 +147,7 @@ return (<>
       <MainIconMenu />
       <Form size="tiny" className="container">
       {/* Search Input & "Show Saved" Button  */}
-      <Grid columns='equal' stackable style={showSearchFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
+      <Grid columns='equal' stackable style={showFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
         <Grid.Column width={4}>
           <Button basic floated='right' inverted color='teal' fluid size='small'
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
@@ -184,15 +170,15 @@ return (<>
             onChange={(e, {value}) => debouncedSearch(value)} 
           />
           <Button 
-            icon={<Icon name={showSearchFilters? "angle up" : "filter"} />}
-            onClick={() => setShowSearchFilters(!showSearchFilters)}
+            icon={<Icon name={showFilters? "angle up" : "filter"} />}
+            onClick={() => setShowFilters(!showFilters)}
             style={{maxHeight: '35px'}}
             />
           </Grid.Column>
       </Grid>
 
       {/* Optional Filters  */}
-      {showSearchFilters &&
+      {showFilters &&
       <Grid stackable columns='equal' style={{marginBottom: '.25em', marginTop: 0}}>
       {/* Age Input  */}
       <Grid.Column width={2}>
@@ -214,7 +200,7 @@ return (<>
             selectOnBlur={false}  
             inverted fluid
             value={searchParams.get('city') || ``} 
-            onChange={(e, {value}) => handleCity(e.type, value)}
+            onChange={(e, {value}) => handleDropdownClick(e.type, value, 'city')}
           />
           </Grid.Column>}
         {/* Keyword Dropdown  */}
@@ -228,7 +214,7 @@ return (<>
             selectOnBlur={false}
             inverted fluid 
             value={searchParams.get('tag') || ``} 
-            onChange={(e, {value}) => handleKeyword(e.type, value)}
+            onChange={(e, {value}) => handleDropdownClick(e.type, value, 'tag')}
           />
         </Grid.Column>}
         {/* COST DROPDOWN  */}
@@ -242,7 +228,7 @@ return (<>
             selectOnBlur={false}
             inverted fluid 
             value={searchParams.get('cost') || ``} 
-            onChange={(e, {value}) => handleCost(e.type,value)}
+            onChange={(e, {value}) => handleDropdownClick(e.type, value, 'cost')}
             />
           </Grid.Column>}
         </Grid>}
