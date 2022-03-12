@@ -4,30 +4,32 @@ import {HashRouter as Router, Route, Routes} from 'react-router-dom'
 import './index.css'
 import Page from './components/Page'
 import Map from './components/Map'
-import { CONTENT } from './constants'
 
+import { CONTENT } from './constants'
 import { getCategoryCount } from './utils'
 
 import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
-// TODO 3/11/14: pull "resources" from API route, if possible. Use the default from constants if not.
-
 function App({listings, listingMetadata}) {
-  // Note: there's currently no element to display footer. This would be a good  issue for OS contributors
-  const {ABOUT_TEXT, DISCLAIMER, FOOTER_DISCLAIMER, VIDEO_TUTORIAL_LINK, RUBRIC_TEXT, CONTRIBUTORS, MORE_RESOURCES, FORMS } = CONTENT 
+  // Static site text comes from a constants file
+  const {ABOUT_TEXT, DISCLAIMER, VIDEO_TUTORIAL_LINK, RUBRIC_TEXT, CONTRIBUTORS, FORMS } = CONTENT 
+  // This is an optional field from the API. Use backup constant data if API data is not available.
+  const resources = listingMetadata.resources ?? null
+  console.log(resources)
   if (!listingMetadata?.categoryCount) listingMetadata.categoryCount = getCategoryCount(listings)
+
   return (
     <Router>
-      <Page disclaimer={DISCLAIMER} aboutText={ABOUT_TEXT} resources={MORE_RESOURCES}>
+      <Page disclaimer={DISCLAIMER} aboutText={ABOUT_TEXT} resources={resources}>
         <Routes>
           {ABOUT_TEXT && <Route path="/about" element={
             <About aboutText={ABOUT_TEXT} contributors={CONTRIBUTORS} disclaimer={DISCLAIMER} videoLink={VIDEO_TUTORIAL_LINK} rubric={RUBRIC_TEXT} 
             />} 
           />}
-          {MORE_RESOURCES && <Route path="/resources" element={
-            <Resources resources={MORE_RESOURCES} 
+          {resources && <Route path="/resources" element={
+            <Resources resources={resources} 
             />} 
           />}
           <Route path="/suggest" element={<SuggestUpdate forms={FORMS} />} />
