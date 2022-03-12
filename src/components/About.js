@@ -3,7 +3,6 @@ import { Container, Header, Image, Item, Segment, Icon } from 'semantic-ui-react
 import whiteBirdLogo from './../resources/whiteBirdLogo.png'
 import {getColor} from './../utils'
 import './About.css'
-import DirectionServiceLogo from '../resources/direction-service-logo.png'
 
 const whiteBirdStyle = {display: 'flex', padding: '1em 1em 1em 0'}
 const contributorStyle = { fontSize: '1.15em' }

@@ -12,6 +12,8 @@ import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
+// TODO 3/11/14: pull "resources" from API route, if possible. Use the default from constants if not.
+
 function App({listings, listingMetadata}) {
   // Note: there's currently no element to display footer. This would be a good  issue for OS contributors
   const {ABOUT_TEXT, DISCLAIMER, FOOTER_DISCLAIMER, VIDEO_TUTORIAL_LINK, RUBRIC_TEXT, CONTRIBUTORS, MORE_RESOURCES, FORMS } = CONTENT 
