@@ -12,13 +12,13 @@ import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
 
-function App({listings, listingMetadata}) {
+function App({listings, metadata}) {
   // Static site text comes from a constants file
   const {ABOUT_TEXT, DISCLAIMER, VIDEO_TUTORIAL_LINK, RUBRIC_TEXT, CONTRIBUTORS, FORMS } = CONTENT 
   // This is an optional field from the API. Use backup constant data if API data is not available.
-  const resources = listingMetadata.resources ?? null
+  const resources = metadata.resources ?? null
   console.log(resources)
-  if (!listingMetadata?.categoryCount) listingMetadata.categoryCount = getCategoryCount(listings)
+  if (!metadata?.categoryCount) metadata.categoryCount = getCategoryCount(listings)
 
   return (
     <Router>
@@ -35,9 +35,9 @@ function App({listings, listingMetadata}) {
           <Route path="/suggest" element={<SuggestUpdate forms={FORMS} />} />
           <Route path="/suggest/:listingId" element={<SuggestUpdate />} />
           <Route path="/" element={
-            <Map listings={listings} listingMetadata={listingMetadata} />} />
+            <Map listings={listings} metadata={metadata} />} />
           <Route path=":markerId" element={
-            <Map listings={listings} listingMetadata={listingMetadata} />} />
+            <Map listings={listings} metadata={metadata} />} />
         </Routes>
       </Page>
     </Router>
