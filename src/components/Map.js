@@ -14,7 +14,7 @@ import './Map.css'
 import { greenLMarker, blueLMarker } from '../resources/mapIcons'
 import { getCityCount, getColor, titleCaseKey } from '../utils'
 
-function MapPage({ listings, listingMetadata }) {
+function MapPage({ listings, metadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
   const navigate = useNavigate()
@@ -49,13 +49,13 @@ function MapPage({ listings, listingMetadata }) {
     } 
   }
 
-  const { listingCategoryIcons, listingCategories, listingCities: defaultListingCities, listingKeywords: defaultListingKeywords } = listingMetadata
+  const { listingCategoryIcons, listingCategories, listingCities: defaultListingCities, listingKeywords: defaultListingKeywords } = metadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
   let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
   
-  // If you don't want to recalculate the two lines below on every search, just use listingMetadata.listingCities and listingMetadata.listingKeywords, respectively
+  // If you don't want to recalculate the two lines below on every search, just use metadata.listingCities and metadata.listingKeywords, respectively
   // This is faster, but also a less rich user experience
   let listingCities = useMemo(() => getCityCount(filteredListings ?? {}), [filteredListings])
   const keywordCount = useMemo(() => getKeywordCount(filteredListings ?? {}), [filteredListings])

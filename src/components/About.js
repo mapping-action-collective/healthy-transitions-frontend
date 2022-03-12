@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Header, Image, Item, Segment, Icon } from 'semantic-ui-react'
+import { Container, Header, Image, Item, Segment } from 'semantic-ui-react'
 import whiteBirdLogo from './../resources/whiteBirdLogo.png'
 import {getColor} from './../utils'
 import './About.css'

@@ -27,7 +27,7 @@ export const CONTENT = {
       "description": "Direction Service provides support for disabled children, youth, young adults, and their families in Eugene, Oregon. Direction Service worked closely with Healthy Transitions youth to make the map what it is today."
     },
     {
-      "name": "Healthy Transitions Transition Age Youth (TAY)",
+      "name": "Healthy Transitions Youth/Young Adult Leaders",
       "logo": "https://i.postimg.cc/bNhrmBb3/healthy-transitions-logo-2020.png",
       "description": "The Oregon Youth Resource Map was created by youth, for youth. The Map was first proposed in a Youth/Young Adult Voices Subcommittee, dreamed up by young leaders with lived experience in mental health systems services in Oregon. The goal is to always have a group of young people continuing to guide and direct development of the map."
     },

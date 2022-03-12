@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 
-import { getListings, getListingMetadata } from './data'
+import { getListings, getMeta } from './data'
 import { formatListings } from './utils'
 
 const CURRENT_URL = new URL(window.location)
@@ -16,6 +16,6 @@ const API_URL =
 Promise
   .all([
     getListings(API_URL),
-    getListingMetadata(API_URL)
+    getMeta(API_URL)
   ])
-  .then(([ listings, listingMetadata ]) => ReactDOM.render(<App listings={formatListings(listings)} listingMetadata={listingMetadata} />, window.app))
+  .then(([ listings, metadata ]) => ReactDOM.render(<App listings={formatListings(listings)} metadata={metadata} />, window.app))
