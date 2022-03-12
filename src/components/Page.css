@@ -20,6 +20,7 @@ html, body { overflow: hidden; }
   color: #FAF9F6;
 }
 
+/* TODO: see if these are being used. combine if so (if time. low priority)  */
 #age-input {
   /* background-color: #E0E1E2; */
   background-color: black;
@@ -45,9 +46,6 @@ html, body { overflow: hidden; }
   color: white;
 }
 
-
-
-
 #keyword-input {
   background-color: black;
   font-weight: bold;
@@ -66,6 +64,10 @@ html, body { overflow: hidden; }
 
 #keyword-input i.dropdown.icon.clear::before {
   font-size: 1.25em;
+}
+
+#keyword-input input {
+  color: white;
 }
 
 /* Semantic Grey: F3F4F5 */

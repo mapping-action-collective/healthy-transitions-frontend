@@ -29,7 +29,7 @@ export const CONTENT = {
     {
       "name": "Healthy Transitions Transition Age Youth (TAY)",
       "logo": "https://i.postimg.cc/bNhrmBb3/healthy-transitions-logo-2020.png",
-      "description": "The idea for the Oregon Youth Resource Map was created by youth, for youth. The Map was first proposed in Youth and Young Adult Voices Comittees, which meet across the state of Oregon. The Healthy Transitions TAY team continues to guide and direct development of the Map."
+      "description": "The Oregon Youth Resource Map was created by youth, for youth. The Map was first proposed in a Youth/Young Adult Voices Subcommittee, dreamed up by young leaders with lived experience in mental health systems services in Oregon. The goal is to always have a group of young people continuing to guide and direct development of the map."
     },
     {
       "name": "Mapping Action Collective",
