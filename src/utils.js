@@ -1,8 +1,11 @@
+/* Display utilities */
 
 export const getColor = index => [ "green", "teal", "blue", "violet", "purple", "pink", "red", "orange", "yellow", "olive", ][ index % 10 ]
+export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
+export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
 
-// for loops are faster, and speed matters here as this calculation runs on every onChange handler in the UI 
-// TODO: memoize this. It's running way too often.
+/* Calculations used by the dropdown menus in MapSearch */
+
 export const getCityCount = listings => {
   let cityCount = {}
   for (let i = 0; i < listings.length; i++) {
@@ -12,11 +15,9 @@ export const getCityCount = listings => {
       else cityCount[city] = 1
     }
   }
-  console.log('city count')
   return cityCount
 }
 
-// Can be fetched from API, or recalculated on search
 export const getKeywordCount = listings => {
   let keywordCount = {}
   listings.forEach((listing) => {
@@ -27,13 +28,11 @@ export const getKeywordCount = listings => {
       })
     }
   })
-  console.log('keyword count')
   return keywordCount
 }
 
 export const costKeywords = ['OHP', 'Private Insurance', 'Financial Aid Available', 'Free', 'Accepts Uninsured', 'Sliding Scale', 'Low Cost', 'Medicare / Medicaid']
 
-// TODO: refactor to use for loop (faster)
 export const getCostCount = listings => {
   let costCount = {}
   listings.forEach((listing) => {
@@ -44,7 +43,6 @@ export const getCostCount = listings => {
       })
     }
   })
-  console.log('cost count')
   return costCount
 }
 
@@ -59,26 +57,18 @@ export const getCategoryCount = (listings) => {
   return listingCategories
 }
 
-export const formatSocialMediaUrl = url => url.includes('https://www.') ? url.split('https://www.')[1] : url.includes('https://') ? url.split('https://')[1] : url.includes('http://') ? url.split('http://')[1] : url
-
-export const titleCaseKey = key => key.charAt(0).toUpperCase() + key.slice(1)
-
-const cost = ["Low Cost", "Free", "OHP", "Accepts Uninsured", "Sliding Scale", "Financial Aid Available"]
-
-// this function accepts json listings and returns them, formatted for leaflet use
+/* This function accepts json listings and returns them, formatted for leaflet use */
 export function formatListings(listings) {
-  // patch. TODO: fix on the BE and remove
   listings = listings.map(listing => {
     if (listing.cost_keywords && listing.cost_keywords?.length > 0) {
       listing.cost = listing.cost_keywords
     }
     return listing
   })
-  console.log(listings)
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
-// This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
+/* Primary search function used by Map */
 export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
   // if URL includes the "saved" param, display saved listings ONLY
   if (searchParams.get('saved')) {
