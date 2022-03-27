@@ -8,7 +8,6 @@ const whiteBirdStyle = {display: 'flex', padding: '1em 1em 1em 0'}
 const contributorStyle = { fontSize: '1.15em' }
 const greyText = {color: "dimgrey"}
 
-// TODO: get code for displaying the yt video link
 function AboutPage({aboutText, contributors, disclaimer, videoLink, rubric}) {
 
   const whiteBirdAttribution = (<Item style={whiteBirdStyle}><Item.Image size='tiny' src={whiteBirdLogo} /><Item.Content style={{alignSelf: "center"}}>Some data was sourced from The Little Help Book published by White Bird Clinic.</Item.Content></Item>)

@@ -1,7 +1,7 @@
 import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
 import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, List, Form, Icon, Input, Dropdown, Button, Divider } from "semantic-ui-react";
+import { Container, Segment, Card, Label, Grid, Ref, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { useSessionStorage } from './../hooks/useSessionStorage'
@@ -365,15 +365,14 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
               {facebook_link && <SocialMediaDisplay icon='facebook' link={facebook_link} /> }
               {twitter_link && <SocialMediaDisplay icon='twitter' link={twitter_link} /> }
               {youtube_link && <SocialMediaDisplay icon='youtube' link={youtube_link} /> }
-              {/* We don't have a tiktok icon available atm. Todo (low priority): find one  */}
-              {/* {tiktok_link && <SocialMediaDisplay icon='' link={tiktok_link} /> } */}
             </div>
           </Segment>
           {(agency_verified && date_agency_verified) && <BlueCheck name={full_name} date={date_agency_verified} />}
-          {/* Description  */}
+
           <Segment basic vertical>
             <ExpandableDescription label="Description" value={description} />
           </Segment>
+
           {covid_message && <Card.Description><Card.Header as="strong">COVID Message:</Card.Header> {covid_message}</Card.Description>}
 
           <Segment secondary style={detailsStyle}>
@@ -389,7 +388,6 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
             : null }
           <Card.Description><Card.Header as="strong">{category.split(':')[0]}:</Card.Header>    <NavLink to={`/?category=${encodeURIComponent(category)}`}> {category.split(':')[1]}</NavLink>
             </Card.Description>
-          {/* <Card.Description as="dl">{Object.entries(listing).filter(([dt, dd]) => dd).map(([dt, dd], i) => <><dt key={dt}>{dt}</dt><dd key={i}>{dd}</dd></>)}</Card.Description> */}
         </Card.Content>
         {/* Show keywords and/or cost_keywords if they exist. If not, show category so cards have consistent design */}
         <Card.Content extra>
