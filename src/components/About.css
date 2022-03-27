@@ -1,3 +1,5 @@
 #about-page, #about-page > article { flex: 1 0; display: flex; flex-flow: column; }
 #about-page > article > figure { margin: auto 0 0; align-self: flex-end; }
 #about-page > article > figure > figcaption { margin: 1rem 0; }
+
+#about-page .embed { flex: 1 1 100%; margin: 1rem 0; display: flex; flex-flow: column nowrap; }

@@ -8,11 +8,7 @@
 
 The [Oregon Youth Resource Map](https://oregonyouthresourcemap.com/) is a website & mobile app that displays mental health resources for Oregon youth, ages 16-25. 
 
-The code is developed and maintained by the [Mapping Action Collective (MAC)](https://mappingaction.org/who-we-are/), in partnership with SAMHSA, Direction Service, Healthy Transitions Transitions, PSU, and more. 
-
-## To Contribute
-- Read the [Contributing to the Repository Guide](https://github.com/mapping-action-collective/healthy-transitions-frontend/wiki/Contributing-to-the-Repository)
-- Check in with the MAC project lead for more instructions 
+The code is developed and maintained by the [Mapping Action Collective (MAC)](https://mappingaction.org/who-we-are/).
 
 ## About Create React App
 ## Available Scripts
