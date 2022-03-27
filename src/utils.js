@@ -57,9 +57,8 @@ export const getCategoryCount = (listings) => {
   return listingCategories
 }
 
-// this function accepts json listings and returns them, formatted for leaflet use
+/* This function accepts json listings and returns them, formatted for leaflet use */
 export function formatListings(listings) {
-  // patch. TODO: fix on the BE and remove
   listings = listings.map(listing => {
     if (listing.cost_keywords && listing.cost_keywords?.length > 0) {
       listing.cost = listing.cost_keywords
@@ -69,7 +68,7 @@ export function formatListings(listings) {
   return listings.map(({latitude, longitude, ...listing}) => ({coords: [latitude, longitude], ...listing}))
 }
 
-// This is more verbose than before, but also more performant, and ideally easier to read for future OS devs.
+/* Primary search function used by Map */
 export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
   // if URL includes the "saved" param, display saved listings ONLY
   if (searchParams.get('saved')) {

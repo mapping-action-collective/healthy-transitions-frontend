@@ -55,11 +55,9 @@ function MapPage({ listings, metadata }) {
 
   let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
   
-  // If you don't want to recalculate the two lines below on every search, just use metadata.listingCities and metadata.listingKeywords, respectively
-  // This is faster, but also a less rich user experience
+  // If you don't want to recalculate the two lines below on every search, just use metadata.listingCities and metadata.listingKeywords, respectively. That would be faster, but also a less rich user experience
   let listingCities = useMemo(() => getCityCount(filteredListings ?? {}), [filteredListings])
   const keywordCount = useMemo(() => getKeywordCount(filteredListings ?? {}), [filteredListings])
-  // TODO: add a default cost count to the API so that we have a default here
   const costCount = useMemo(() => getCostCount(filteredListings ?? {}), [filteredListings])
   
   const cardRefs = listings.reduce((cardRefs, listing) => ({...cardRefs, [listing.guid]: createRef()}), {})
