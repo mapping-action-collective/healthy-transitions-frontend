@@ -17,24 +17,3 @@ export const getCityCountDemo = listings => {
   // Filter out cities with no entries
   return Object.fromEntries(Object.entries(cityCount).filter(([k, v]) => v !== 0))
 }
-
-
-// TODO: run this server side
-const cost = ["Low Cost", "Free", "OHP", "Accepts Uninsured", "Sliding Scale", "Financial Aid Available"]
-
-const addCostToListing = listing => {
-  // Staging already does this server-side. If it's already in place, skip.
-  if (listing.cost_keywords && listing.cost_keywords?.length > 0) return listing
-
-  else if (listing.keywords) {
-    let keywords = listing.keywords
-    // Grab cost-related keywords out of the general keywords array
-    const costKeywords = keywords.filter(keyword => cost.includes(keyword))
-    if (costKeywords && costKeywords?.length > 0) listing.cost = [...costKeywords]
-    // Remove cost keywords from main keywords array. This will happen server-side; this is a temporary patch.
-    keywords = keywords.filter(keyword => !cost.includes(keyword)) 
-    listing.keywords = keywords
-    return listing;
-  }
-  return listing;
-}

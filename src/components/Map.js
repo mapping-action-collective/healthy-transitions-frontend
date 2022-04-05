@@ -65,8 +65,8 @@ function MapPage({ listings, metadata }) {
 
   return (<>
     <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} keywordCount={keywordCount} costCount={costCount} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
-    <Container as="main" id="map-page">
-      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} />
+    <Container as="main" id="map-page" key='map-container'>
+      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} key='map-cards' />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
     </Container>
   </>)
@@ -273,13 +273,14 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
     }
     return listings.slice(0, numEntries).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
   }
+  console.log(Date.now())
   
   return (
-    <Card.Group as="section" itemsPerRow="1">
+    <Card.Group as="section" itemsPerRow="1" key='cards'>
       {/* No results found  */}
       {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
       {/* Show first 30 listings by default if filteredListings is longer than that  */}
-      <CardsDisplay numEntries={numCardsShowing} />
+      <CardsDisplay numEntries={numCardsShowing} key='cards-display' />
       {/* "Show More Listings" button  */}
       {(listings.length > numCardsShowing) && <Button fluid basic color='grey' icon='angle double down' content={`Show more results`} onClick={() => setNumCardsShowing(numCardsShowing + 25)} style={showButtonStyle} />}
     </Card.Group>
@@ -334,10 +335,10 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
   const KeywordDisplay = ({arr}) => arr.map((keyword, i) => (
     <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> )
   ) 
-
+    console.log(guid)
   return (
     <Ref innerRef={ref}>
-      <Card as="article" color={cardColor} centered raised className="map-card" style={cardStyle}>
+      <Card as="article" key={guid} color={cardColor} centered raised className="map-card" style={cardStyle}>
         <Card.Content>
         {/* Extra divs are necessary for flex box spacing  */}
           <div style={labelDivStyle}>
