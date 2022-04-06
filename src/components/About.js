@@ -26,17 +26,19 @@ const logos = [
  { src: macLogo, alt: 'Mapping Action Collective Logo' },
 ]
 
+const iFrameSource = 'https://docs.google.com/document/d/e/2PACX-1vQK9o78JtKu0QdCouw6lGAAdfpCxZw_Nre-Kpcb2NHu__RJR0LfPGf11OhEGRRg1MEskVQyA5MNs_Jw/pub?embedded=true'
+
 function AboutPage () {
   return (
     <>
       <Container as="main" id="about-page">
         <Header as="h1" style={{marginTop: '1em', textAlign: 'center'}}>About</Header>
         <Segment as="article" basic vertical className='embed'>
-          <iframe src="https://docs.google.com/document/d/e/2PACX-1vTqbzVCUQ0idMjVoJbCt__5NkPxtmcFDFh_fG2MTHCxk6g4V0DxD_3Z-GP-HlgfwT9P_A8Ijpb-77qn/pub?embedded=true" frameBorder="0" marginHeight="0" marginWidth="0"></iframe>
+          <iframe title="Healthy Transitions About page" src={iFrameSource} frameBorder="0" marginHeight="0" marginWidth="0"></iframe>
         </Segment>
       </Container>
-      <div style={{display: 'flex', justifyContent: 'center'}}>
-        {logos.map(logo => <Image src={logo.src} alt={logo.alt} style={{height: '75px', margin: '10px 15px'}} />)}
+      <div style={{display: 'flex', justifyContent: 'center', flexWrap: 'true'}}>
+        {logos.map(logo => <Image src={logo.src} alt={logo.alt} style={{height: '75px', margin: '10px 15px'}} key={logo.src} />)}
       </div>
       {/* DO NOT REMOVE. Required by White Bird and MAC TOS. */}
       {whiteBirdAttribution}
