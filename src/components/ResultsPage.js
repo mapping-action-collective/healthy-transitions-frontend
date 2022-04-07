@@ -3,7 +3,6 @@ import { debounce } from "lodash"
 import { useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
 import { Container, Segment, Card, Label, Grid, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
 import { useSelector, useDispatch } from 'react-redux'
-import { toggleSavedVisibility } from '../store/savedCardSlice'
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
@@ -50,7 +49,6 @@ const SavedResultsButton = () => {
   let savedCards = useSelector(state => state.savedCards.savedCards)
   let showingSavedResults = searchParams.get('saved') !== null
 
-
   const handleSavedButtonClick = () => {
     if (showingSavedResults) {
       navigate({ pathname: '/', search: ''})
@@ -60,17 +58,14 @@ const SavedResultsButton = () => {
     }
   }
 
-
   return (
-    <Grid.Column width={4}>
-      <Button basic floated='right' inverted color='teal' fluid size='small'
-        icon={showingSavedResults ? 'list' : 'star outline'}
-        content={showingSavedResults ? 'Show All' : 'Show Saved'}
-        disabled={savedCards.length === 0 && showingSavedResults === false} 
-        onClick={() => handleSavedButtonClick()}
-        style={{minWidth: '150px'}}
-        />
-    </Grid.Column>
+    <Button basic floated='right' inverted color='teal' fluid size='small'
+      icon={showingSavedResults ? 'list' : 'star outline'}
+      content={showingSavedResults ? 'Show All' : 'Show Saved'}
+      disabled={savedCards.length === 0 && showingSavedResults === false} 
+      onClick={() => handleSavedButtonClick()}
+      style={{minWidth: '150px'}}
+      />
   )
 }
 
@@ -147,7 +142,9 @@ return (<>
       <MainIconMenu />
       <Form size="tiny" className="container">
       <Grid columns='equal' stackable style={showFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
-        <SavedResultsButton />
+        <Grid.Column width={4}>
+          <SavedResultsButton />
+        </Grid.Column>
         <Grid.Column style={{display: 'flex'}}>
           <Input 
             tabIndex="1" fluid

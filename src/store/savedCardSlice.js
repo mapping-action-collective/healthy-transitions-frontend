@@ -10,6 +10,8 @@ export const savedCardSlice = createSlice({
   initialState,
   reducers: {
     clearSavedCards: (state) => state.savedCards = [],
+    // NOTE: toggleSavedVisibility is currently unused since the components are relying on searchParams instead
+    // this is likely to change in the future however, so I'm leaving this in place.
     toggleSavedVisibility: (state) => Object.assign(state, {savedCardsVisible: !state.savedCardsVisible}),
     toggleSavedValues: (state, action) => {
       const { id } = action.payload
