@@ -1,21 +1,16 @@
-import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
-import { debounce } from "lodash"
-import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
-import { Container, Segment, Card, Label, Grid, Ref, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
-import MarkerClusterGroup from 'react-leaflet-markercluster';
-import { useSessionStorage } from '../hooks/useSessionStorage'
-// Redux testing
+import React, { forwardRef } from "react";
+import { Link, useNavigate, useSearchParams, NavLink } from "react-router-dom";
+import { Segment, Card, Label, Ref, Dropdown, Icon } from "semantic-ui-react";
+// TODO: re-add the hook below to store saved cards in session storage
+// import { useSessionStorage } from '../hooks/useSessionStorage'
 import { useSelector, useDispatch } from 'react-redux'
 import { clearSavedCards, toggleSavedVisibility, toggleSavedValues } from '../store/savedCardSlice'
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
 
-import { filterListings, getKeywordCount, getCostCount } from '../utils'
 import './Map.css'
-import { greenLMarker, blueLMarker } from '../resources/mapIcons'
-import { getCityCount, getColor, titleCaseKey } from '../utils'
+import { getColor } from '../utils'
 
 const starStyle = { marginRight: '.65em' }
 const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
