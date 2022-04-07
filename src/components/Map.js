@@ -20,9 +20,8 @@ import { getCityCount, getColor, titleCaseKey } from '../utils'
 function MapPage({ listings, metadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
-  const navigate = useNavigate()
 
-  const { listingCategoryIcons, listingCategories, listingCities: defaultListingCities, listingKeywords: defaultListingKeywords } = metadata
+  const { listingCategoryIcons, listingCategories } = metadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
@@ -37,7 +36,8 @@ function MapPage({ listings, metadata }) {
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons}    debouncedSearch={debouncedSearch} 
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons}        
+      debouncedSearch={debouncedSearch} 
       listingCities={listingCities} keywordCount={keywordCount} costCount={costCount} />
     <Container as="main" id="map-page" key='map-container'>
       <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
@@ -47,28 +47,37 @@ function MapPage({ listings, metadata }) {
 }
 
 const SavedButton = () => {
+  const [ searchParams, ] = useSearchParams()
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   let savedCards = useSelector(state => state.savedCards.savedCards)
   let savedCardsVisible = useSelector(state => state.savedCards.savedCardsVisible)
 
-  console.log('saved cards visible', savedCardsVisible)
-  console.log('saved cards', savedCards)
+  const handleSavedButtonClick = () => {
+    if (savedCardsVisible || searchParams.get('saved')) {
+      dispatch(toggleSavedVisibility())
+      navigate({ pathname: '/', search: ''})
+    } else {
+      dispatch(toggleSavedVisibility())
+      const paramsString = savedCards.join("&saved=")
+      navigate({ pathname: '/', search: `?saved=${paramsString}` })
+    }
+  }
+
   return (
     <Grid.Column width={4}>
       <Button basic floated='right' inverted color='teal' fluid size='small'
-          icon={savedCardsVisible ? 'list' : 'star outline'}
-          content={savedCardsVisible ? 'Show All' : 'Show Saved'}
-          disabled={savedCards?.length > 0} 
-          // Todo: This is throwing an immer error. Debug and re-add
-          // Todo: actually, have this display saved guids in nav bar like before
-          onClick={() => dispatch(toggleSavedVisibility())}
-          style={{minWidth: '150px'}}
-          />
+        icon={savedCardsVisible ? 'list' : 'star outline'}
+        content={savedCardsVisible ? 'Show All' : 'Show Saved'}
+        disabled={savedCards.length === 0 && !searchParams.get('saved')?.length} 
+        onClick={() => handleSavedButtonClick()}
+        style={{minWidth: '150px'}}
+        />
     </Grid.Column>
   )
 }
 
-function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleShowSaved, keywordCount, costCount }) {
+function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, keywordCount, costCount }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams, setSearchParams ] = useSearchParams()
@@ -140,19 +149,8 @@ return (<>
     <Segment as="nav" id="map-nav" color="black" basic vertical inverted>
       <MainIconMenu />
       <Form size="tiny" className="container">
-      {/* Search Input & "Show Saved" Button  */}
       <Grid columns='equal' stackable style={showFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
-      <SavedButton />
-        {/* <Grid.Column width={4}>
-          <Button basic floated='right' inverted color='teal' fluid size='small'
-              icon={searchParams.get('saved') ? 'list' : 'star outline'}
-              content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
-              disabled={saved.length === 0 && !searchParams.get('saved')} 
-              onClick={() => handleShowSaved(saved)}
-              style={{minWidth: '150px'}}
-              />
-        </Grid.Column> */}
-        {/* Search Text Input  */}
+        <SavedButton />
         <Grid.Column style={{display: 'flex'}}>
           <Input 
             tabIndex="1" fluid
@@ -246,7 +244,7 @@ const showButtonStyle = {
   marginBottom: '25px',
 }
 
-function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide }) {
+function MapCards({ listings, cardRefs, mapRef }) {
   const location = useLocation()
   const { markerId } = useParams()
   const [numCardsShowing, setNumCardsShowing] = useState(25)
@@ -258,7 +256,7 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   }, [currentCard, location, mapRef])
 
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
-  const CardsDisplay = ({numEntries = 600}) => {
+  const CardsDisplay = ({numEntries}) => {
     if (markerId) {
       const cardsToShow = listings.slice(0, numEntries)
       // Note: Leave this as a double equals to work around type coercion
@@ -295,7 +293,6 @@ const socialLinkStyle = { display: 'flex' }
 const FavoriteStarIcon = ({color, guid}) => {
   const dispatch = useDispatch()
   const saved = useSelector(state => state.savedCards.savedCards.includes(guid))
-  console.log('card rendered')
 
   return (
     <Icon name={saved ? 'star' : 'star outline'} color={color} style={starStyle} 
