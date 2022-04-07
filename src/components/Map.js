@@ -1,4 +1,4 @@
-import React, { createRef, forwardRef, useEffect, useMemo, useState } from "react";
+import React, { createRef, forwardRef, useEffect, useMemo, useState, memo } from "react";
 import { debounce } from "lodash"
 import { Link, useParams, useNavigate, useLocation, useSearchParams, NavLink } from "react-router-dom";
 import { Container, Segment, Card, Label, Grid, Ref, Form, Icon, Input, Dropdown, Button } from "semantic-ui-react";
@@ -21,42 +21,12 @@ function MapPage({ listings, metadata }) {
   const [ searchParams, ] = useSearchParams()
   const [ search, setSearch ] = useState()
   const navigate = useNavigate()
-  // Saved listings write to session storage and persist. Hidden listings reset on page refresh.
-  const [saved, setSaved] = useSessionStorage('saved', [])
-  const [hidden, setHidden] = useState([])
-  const [showSaved, setShowSaved] = useState(false)
-
-  const handleSave = (id, reset=false) => {
-    if (reset) { setSaved([]); return; }
-    saved.includes(id) ? setSaved(saved.filter(e => e !== id)) : setSaved([...saved, id])
-  }
-  
-  const handleHide = (id, reset=false) => {
-    if (reset) { setHidden([]); return; }
-    // Remove from saved if it's saved. UX gets wonky otherwise.
-    saved.includes(id) && setSaved(saved.filter(e => e !== id))
-    setHidden([...hidden, id])
-  }
-
-  // "saved" is an array of saved card guids
-  const handleShowSaved = () => {
-    // If saved is already showing, clear the url bar
-    if (searchParams.get('saved')) {
-      setShowSaved(false)
-      navigate({ pathname: '/', search: ''})
-    } else if (saved.length > 0) {
-      // set state so that the UI components can update
-      setShowSaved(true)
-      const paramsString = saved.join("&saved=")
-      navigate({ pathname: '/', search: `?saved=${paramsString}` })
-    } 
-  }
 
   const { listingCategoryIcons, listingCategories, listingCities: defaultListingCities, listingKeywords: defaultListingKeywords } = metadata
 
   const debouncedSearch = debounce((value) => { setSearch(value) }, 300);
 
-  let filteredListings = useMemo(() => filterListings(listings, searchParams, search, hidden), [listings, searchParams, search, hidden])
+  let filteredListings = useMemo(() => filterListings(listings, searchParams, search), [listings, searchParams, search])
   
   // If you don't want to recalculate the two lines below on every search, just use metadata.listingCities and metadata.listingKeywords, respectively. That would be faster, but also a less rich user experience
   let listingCities = useMemo(() => getCityCount(filteredListings ?? {}), [filteredListings])
@@ -67,12 +37,35 @@ function MapPage({ listings, metadata }) {
   const mapRef = createRef()
 
   return (<>
-    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons} debouncedSearch={debouncedSearch} listingCities={listingCities} keywordCount={keywordCount} costCount={costCount} saved={saved} handleSave={handleSave} handleHide={handleHide} hidden={hidden} showSaved={showSaved} handleShowSaved={handleShowSaved} />
+    <MapSearch listingCategories={listingCategories} listingCategoryIcons={listingCategoryIcons}    debouncedSearch={debouncedSearch} 
+      listingCities={listingCities} keywordCount={keywordCount} costCount={costCount} />
     <Container as="main" id="map-page" key='map-container'>
-      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} saved={saved} handleSave={handleSave} handleHide={handleHide} key='map-cards' />
+      <MapCards listings={filteredListings} cardRefs={cardRefs} mapRef={mapRef} />
       <MapMap listings={filteredListings} cardRefs={cardRefs} ref={mapRef} />
     </Container>
   </>)
+}
+
+const SavedButton = () => {
+  const dispatch = useDispatch()
+  let savedCards = useSelector(state => state.savedCards.savedCards)
+  let savedCardsVisible = useSelector(state => state.savedCards.savedCardsVisible)
+
+  console.log('saved cards visible', savedCardsVisible)
+  console.log('saved cards', savedCards)
+  return (
+    <Grid.Column width={4}>
+      <Button basic floated='right' inverted color='teal' fluid size='small'
+          icon={savedCardsVisible ? 'list' : 'star outline'}
+          content={savedCardsVisible ? 'Show All' : 'Show Saved'}
+          disabled={savedCards?.length > 0} 
+          // Todo: This is throwing an immer error. Debug and re-add
+          // Todo: actually, have this display saved guids in nav bar like before
+          onClick={() => dispatch(toggleSavedVisibility())}
+          style={{minWidth: '150px'}}
+          />
+    </Grid.Column>
+  )
 }
 
 function MapSearch({ listingCategories, listingCategoryIcons, debouncedSearch, listingCities, saved, handleShowSaved, keywordCount, costCount }) {
@@ -149,7 +142,8 @@ return (<>
       <Form size="tiny" className="container">
       {/* Search Input & "Show Saved" Button  */}
       <Grid columns='equal' stackable style={showFilters ? {marginTop: '1.5em'} : { marginTop: '1.5em', marginBottom: '.25em'}}>
-        <Grid.Column width={4}>
+      <SavedButton />
+        {/* <Grid.Column width={4}>
           <Button basic floated='right' inverted color='teal' fluid size='small'
               icon={searchParams.get('saved') ? 'list' : 'star outline'}
               content={(searchParams.get('saved')) ? 'Show All' : 'Show Saved'}
@@ -157,7 +151,7 @@ return (<>
               onClick={() => handleShowSaved(saved)}
               style={{minWidth: '150px'}}
               />
-        </Grid.Column>
+        </Grid.Column> */}
         {/* Search Text Input  */}
         <Grid.Column style={{display: 'flex'}}>
           <Input 
@@ -258,38 +252,33 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   const [numCardsShowing, setNumCardsShowing] = useState(25)
   const currentCard = cardRefs[markerId]
 
-  // Redux testing
-  const dispatch = useDispatch()
-  const savedCardsRedux = useSelector(state => state.savedCards.savedCards)
-  console.log('cards from redux', savedCardsRedux)
-
   useEffect(() => {
     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
   }, [currentCard, location, mapRef])
 
   // Limit the number of results shown after search, for speed optimization. User can click "Show More" button to reveal the additional hidden results (all results.)
-  const CardsDisplay = ({numEntries}) => {
+  const CardsDisplay = ({numEntries = 600}) => {
     if (markerId) {
       const cardsToShow = listings.slice(0, numEntries)
       // Note: Leave this as a double equals to work around type coercion
-      if (cardsToShow.find(listing => listing.guid == markerId)) { return cardsToShow.map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) } 
+      if (cardsToShow.find(listing => listing.guid == markerId)) { return cardsToShow.map((listing, index) => <MapCard key={listing.guid} listing={listing} ref={cardRefs[listing.guid]} mapRef={mapRef} index={index} />) } 
       else {
         const currentListing = listings.find(listing => listing.guid == markerId) 
-        return cardsToShow.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />) 
+        return cardsToShow.concat(currentListing).map((listing, index) => <MapCard key={listing.guid} listing={listing} ref={cardRefs[listing.guid]} mapRef={mapRef} index={index} />) 
       } 
     }
-    return listings.slice(0, numEntries).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
+    return listings.slice(0, numEntries).map((listing, index) => <MapCard key={listing.guid} listing={listing} ref={cardRefs[listing.guid]} mapRef={mapRef} index={index} />)
   }
   
   return (
     <Card.Group as="section" itemsPerRow="1" key='cards'>
-      {/* No results found  */}
       {listings?.length === 0 && <div style={{textAlign: 'center'}}>No Results Found.</div>}
-      {/* Show first 30 listings by default if filteredListings is longer than that  */}
       <CardsDisplay numEntries={numCardsShowing} key='cards-display' />
-      {/* "Show More Listings" button  */}
-      {(listings.length > numCardsShowing) && <Button fluid basic color='grey' icon='angle double down' content={`Show more results`} onClick={() => setNumCardsShowing(numCardsShowing + 25)} style={showButtonStyle} />}
+      {(listings.length > numCardsShowing) && 
+        <Button fluid basic color='grey' icon='angle double down' content={`Show more results`} 
+        onClick={() => setNumCardsShowing(numCardsShowing + 25)} style={showButtonStyle} 
+        />}
     </Card.Group>
   )
 }
@@ -306,6 +295,8 @@ const socialLinkStyle = { display: 'flex' }
 const FavoriteStarIcon = ({color, guid}) => {
   const dispatch = useDispatch()
   const saved = useSelector(state => state.savedCards.savedCards.includes(guid))
+  console.log('card rendered')
+
   return (
     <Icon name={saved ? 'star' : 'star outline'} color={color} style={starStyle} 
       onClick={() => dispatch(toggleSavedValues({id: guid}))} 
@@ -313,8 +304,8 @@ const FavoriteStarIcon = ({color, guid}) => {
   )
 }
 
-const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, index}, ref) => {
-  const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified, cost_keywords, tiktok_link } = listing
+const MapCardBase = forwardRef(({ mapRef, listing, index}, ref) => {
+  const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified, cost_keywords} = listing
 
   const navigate = useNavigate()
   const [ searchParams, setSearchParams ] = useSearchParams()
@@ -411,6 +402,8 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
     </Ref>
   )
 })
+
+const MapCard = memo(MapCardBase)
 
 const ExpandableDescription = ({ label, value }) => <>
     { label && <Card.Header as="strong">{label}:</Card.Header> }

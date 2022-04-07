@@ -69,7 +69,7 @@ export function formatListings(listings) {
 }
 
 /* Primary search function used by Map */
-export function filterListings(listings = {}, searchParams, search = "", hidden=[]) {
+export function filterListings(listings = {}, searchParams, search = "") {
   // if URL includes the "saved" param, display saved listings ONLY
   if (searchParams.get('saved')) {
     let savedGuids = searchParams.getAll('saved')
@@ -78,9 +78,7 @@ export function filterListings(listings = {}, searchParams, search = "", hidden=
 
   const { age, tag, ...filters } = Object.fromEntries(searchParams) 
   const searchFunction = (listing) => {
-    const isHidden = (hidden.includes(listing.guid)) 
-    if (isHidden) return false
-
+  
     const listingEntries = Object.entries(listing).join(" ").toLowerCase()
 
     if (tag) {

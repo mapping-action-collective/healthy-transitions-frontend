@@ -10,7 +10,7 @@ export const savedCardSlice = createSlice({
   initialState,
   reducers: {
     clearSavedCards: (state) => state.savedCards = [],
-    toggleSavedVisibility: (state) => state.savedCardsVisible = !state.savedCardsVisible,
+    toggleSavedVisibility: (state) => Object.assign(state, {savedCardsVisible: !state.savedCardsVisible}),
     toggleSavedValues: (state, action) => {
       const { id } = action.payload
       state.savedCards.includes(id) ? 
