@@ -294,21 +294,6 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   )
 }
 
-const CardCornerDropdown = ({ cardColor, guid, handleHide }) => {
-  return (
-    <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
-      <Dropdown.Menu>
-        <Dropdown.Item text='Copy link'icon='share alternate' id={`share=${guid}`}
-        onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
-        />
-        <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest' target='_blank' text='Comment' icon={{ name: 'chat', color: cardColor}} />
-        <Dropdown.Item onClick={() => handleHide(guid)}
-          text='Hide listing' icon={{ name: 'eye slash outline', color: cardColor}} />
-      </Dropdown.Menu>
-    </Dropdown>
-  )
-}
-
 const starStyle = { marginRight: '.65em' }
 const labelDivStyle = { display: 'flex', justifyContent: 'space-between' }
 const cardStyle = { maxWidth: '525px' }
@@ -321,7 +306,6 @@ const socialLinkStyle = { display: 'flex' }
 const FavoriteStarIcon = ({color, guid}) => {
   const dispatch = useDispatch()
   const saved = useSelector(state => state.savedCards.savedCards.includes(guid))
-
   return (
     <Icon name={saved ? 'star' : 'star outline'} color={color} style={starStyle} 
       onClick={() => dispatch(toggleSavedValues({id: guid}))} 
@@ -342,7 +326,7 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
   }
 
   const BlueCheck = ({name, date}) => (
-    <div style={blueCheckStyle}><Icon name='check' color={cardColor} /> Verified by {name} on {date}</div>
+    <div style={blueCheckStyle}><Icon name='check' color={cardColor} /> Verified by {name}</div>
   )
 
   const SocialMediaDisplay = ({link, icon}) => (
@@ -359,13 +343,20 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
     <Ref innerRef={ref}>
       <Card as="article" key={guid} color={cardColor} centered raised className="map-card" style={cardStyle}>
         <Card.Content>
-        {/* Extra divs are necessary for flex box spacing  */}
           <div style={labelDivStyle}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={cardColor} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
             <div> 
               <FavoriteStarIcon color={cardColor} guid={guid} />
-              {/* <Icon name={saved ? 'star' : 'star outline'} color={cardColor} style={starStyle} onClick={() => handleSave(guid)} /> */}
-              {CardCornerDropdown({cardColor, guid, full_address, mapRef, handleHide})}
+              <Dropdown icon={<Icon name='ellipsis horizontal' color='grey' />} direction='left'>
+                <Dropdown.Menu>
+                  <Dropdown.Item text='Copy link'icon='share alternate' id={`share=${guid}`}
+                    onClick={() => navigator.clipboard.writeText(`oregonyouthresourcemap.com/#/${guid}`)}
+                  />
+                  <Dropdown.Item as="a" href='https://oregonyouthresourcemap.com/#/suggest'       target='_blank' text='Comment' icon={{ name: 'chat', color: cardColor}} />
+                  <Dropdown.Item as={Link} to={`/${guid}`} ribbon color={cardColor} text='View on map'
+                     icon={{ name: 'map outline', color: cardColor}} />
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
           </div>
           {/* Header  */}
