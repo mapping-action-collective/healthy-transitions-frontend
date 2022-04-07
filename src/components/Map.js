@@ -5,6 +5,9 @@ import { Container, Segment, Card, Label, Grid, Ref, Form, Icon, Input, Dropdown
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from "react-leaflet";
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { useSessionStorage } from './../hooks/useSessionStorage'
+// Redux testing
+import { useSelector, useDispatch } from 'react-redux'
+import { clearSavedCards, toggleSavedVisibility, toggleSavedValues } from '../store/savedCardSlice'
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-markercluster/dist/styles.min.css';
@@ -255,6 +258,11 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
   const [numCardsShowing, setNumCardsShowing] = useState(25)
   const currentCard = cardRefs[markerId]
 
+  // Redux testing
+  const dispatch = useDispatch()
+  const savedCardsRedux = useSelector(state => state.savedCards.savedCards)
+  console.log('cards from redux', savedCardsRedux)
+
   useEffect(() => {
     if (location.state?.scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth' })
     else if (currentCard) currentCard.current?.scrollIntoView({behavior: "smooth"})
@@ -273,7 +281,6 @@ function MapCards({ listings, cardRefs, mapRef, saved, handleSave, handleHide })
     }
     return listings.slice(0, numEntries).map((listing, index) => <MapCard key={listing.guid} listing={listing} index={index} ref={cardRefs[listing.guid]} mapRef={mapRef} saved={saved?.includes(listing.guid)} handleSave={handleSave} handleHide={handleHide} />)
   }
-  console.log(Date.now())
   
   return (
     <Card.Group as="section" itemsPerRow="1" key='cards'>
@@ -310,6 +317,18 @@ const detailsStyle = { marginTop: '.10em', padding: '.75em' }
 const blueCheckStyle = { color: 'grey', fontStyle: 'italic' }
 const socialLinkStyle = { display: 'flex' }
 
+
+const FavoriteStarIcon = ({color, guid}) => {
+  const dispatch = useDispatch()
+  const saved = useSelector(state => state.savedCards.savedCards.includes(guid))
+
+  return (
+    <Icon name={saved ? 'star' : 'star outline'} color={color} style={starStyle} 
+      onClick={() => dispatch(toggleSavedValues({id: guid}))} 
+    />
+  )
+}
+
 const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, index}, ref) => {
   const { guid, category, parent_organization, full_name, full_address, description, text_message_instructions, phone_1, phone_label_1, phone_1_ext, phone_2, phone_label_2, crisis_line_number, crisis_line_label, website, blog_link, twitter_link, facebook_link, youtube_link, instagram_link, program_email, languages_offered, services_provided, keywords, min_age, max_age, eligibility_requirements, covid_message, financial_information, intake_instructions, agency_verified, date_agency_verified, cost_keywords, tiktok_link } = listing
 
@@ -335,7 +354,7 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
   const KeywordDisplay = ({arr}) => arr.map((keyword, i) => (
     <NavLink to={`/?${new URLSearchParams({...Object.fromEntries(searchParams), tag: `${keyword}` }).toString()}`} key={keyword} onClick={() => updateSearchParams('tag', keyword)} style={tagStyle}> # {keyword}</NavLink> )
   ) 
-    console.log(guid)
+
   return (
     <Ref innerRef={ref}>
       <Card as="article" key={guid} color={cardColor} centered raised className="map-card" style={cardStyle}>
@@ -344,7 +363,8 @@ const MapCard = forwardRef(({ mapRef, listing, saved, handleSave, handleHide, in
           <div style={labelDivStyle}>
             <Label as={Link} to={parent_organization ? `/?parent_organization=${encodeURIComponent(parent_organization)}` : `/?full_name=${encodeURIComponent(full_name)}`} ribbon color={cardColor} style={{marginBottom: `1em`}}>{parent_organization || full_name}</Label>
             <div> 
-              <Icon name={saved ? 'star' : 'star outline'} color={cardColor} style={starStyle} onClick={() => handleSave(guid)} />
+              <FavoriteStarIcon color={cardColor} guid={guid} />
+              {/* <Icon name={saved ? 'star' : 'star outline'} color={cardColor} style={starStyle} onClick={() => handleSave(guid)} /> */}
               {CardCornerDropdown({cardColor, guid, full_address, mapRef, handleHide})}
             </div>
           </div>
