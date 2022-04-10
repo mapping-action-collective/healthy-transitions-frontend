@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux'
+import { store } from './store/store'
 import App from './App'
 
 import { getListings, getMeta } from './data'
@@ -18,4 +20,10 @@ Promise
     getListings(API_URL),
     getMeta(API_URL)
   ])
-  .then(([ listings, metadata ]) => ReactDOM.render(<App listings={formatListings(listings)} metadata={metadata} />, window.app))
+  .then(([ listings, metadata ]) => (
+    ReactDOM.render(
+      <Provider store={store}>
+        <App listings={formatListings(listings)} metadata={metadata} />
+      </Provider>, 
+    window.app)
+))

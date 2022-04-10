@@ -3,7 +3,7 @@ import {HashRouter as Router, Route, Routes} from 'react-router-dom'
 
 import './index.css'
 import Page from './components/Page'
-import Map from './components/Map'
+import Map from './components/Map/Map'
 import About from './components/About'
 import Resources from './components/Resources'
 import SuggestUpdate from './components/SuggestUpdate'
